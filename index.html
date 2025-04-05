@@ -1,0 +1,3551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Practice Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #1a73e8;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .tab.active {
+            background-color: #1a73e8;
+            color: white;
+        }
+        .content {
+            display: none;
+        }
+        .content.active {
+            display: block;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1558b3;
+        }
+        button.danger {
+            background-color: #e53935;
+        }
+        button.danger:hover {
+            background-color: #c62828;
+        }
+        button.secondary {
+            background-color: #757575;
+        }
+        button.secondary:hover {
+            background-color: #616161;
+        }
+        button.success {
+            background-color: #4caf50;
+        }
+        button.success:hover {
+            background-color: #388e3c;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+        }
+        input[type="number"] {
+            width: 80px;
+        }
+        .item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-details {
+            flex-grow: 1;
+        }
+        .study-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .assessment-buttons {
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .category-tag {
+            background-color: #e0e0e0;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-right: 10px;
+        }
+        .checkbox-container {
+            margin: 10px 0;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .category-list {
+            margin-top: 10px;
+        }
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            align-items: center;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 60%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .timer-container {
+            font-size: 2em;
+            margin: 20px 0;
+        }
+        .timer-controls {
+            margin: 10px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress {
+            height: 10px;
+            background-color: #1a73e8;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 5px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        .notes-field {
+            width: 100%;
+            height: 80px;
+            margin: 10px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .difficulty-selector {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .difficulty-option {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        .difficulty-option.selected {
+            background-color: #1a73e8;
+            color: white;
+            border-color: #1558b3;
+        }
+        .difficulty-option:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+        .difficulty-option:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+        .performance-history {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .history-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .dashboard-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: center;
+        }
+        .card-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        .card-label {
+            color: #757575;
+            font-size: 0.9em;
+        }
+        .practice-log {
+            margin-top: 20px;
+        }
+        .log-entry {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .log-date {
+            font-weight: bold;
+        }
+        .priority-high {
+            border-left: 4px solid #e53935;
+        }
+        .priority-medium {
+            border-left: 4px solid #ff9800;
+        }
+        .priority-low {
+            border-left: 4px solid #4caf50;
+        }
+        .mastery-level {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .mastery-1 { background-color: #e53935; }
+        .mastery-2 { background-color: #ff9800; }
+        .mastery-3 { background-color: #4caf50; }
+        .mastery-4 { background-color: #2196f3; }
+        .mastery-5 { background-color: #9c27b0; }
+
+        /* Metronome styling - simplified */
+        .metronome-container {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .metronome-controls {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .tempo-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 15px;
+            min-width: 60px;
+        }
+        
+        /* Tally counter styling */
+        .tally-counter {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .tally-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #1a73e8;
+        }
+        .tally-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* Weekly planning styling */
+        .tips-container {
+            background-color: #e3f2fd;
+            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .tips-container h3 {
+            margin-top: 0;
+        }
+        .tips-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .tips-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .tips-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #1a73e8;
+        }
+        .reschedule-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+
+/* Status indicator styles */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-active { background-color: #4caf50; }
+.status-maintenance { background-color: #2196f3; }
+.status-neglected { background-color: #c77804; }
+.status-archived { background-color: #9e9e9e; }
+
+.status-btn {
+    padding: 5px 10px;
+    margin: 0 5px 5px 0;
+    border: 1px solid #ccc;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.status-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.status-btn.active {
+    border-color: #4caf50;
+    background-color: #4caf50;
+}
+
+.status-btn.maintenance {
+    border-color: #2196f3;
+    background-color: #2196f3;
+}
+
+.status-btn.archived {
+    border-color: #9e9e9e;
+    background-color: #9e9e9e;
+}
+
+/* Neglected piece warning */
+.neglected-warning {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+    padding: 10px 15px;
+    margin: 15px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Banner for rediscovery recommendation */
+.rediscovery-banner {
+    background-color: #fff3e0;
+    border: 1px solid #ffcc80;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rediscovery-banner-text {
+    flex-grow: 1;
+}
+
+.rediscovery-banner-actions {
+    display: flex;
+    gap: 10px;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Music Practice Manager</h1>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('study')">Study Session</div>
+            <div class="tab" onclick="switchTab('manage')">Repertoire/Exercises</div>
+            <div class="tab" onclick="switchTab('categories')">Categories</div>
+            <div class="tab" onclick="switchTab('practice-history')">Practice History</div>
+            <div class="tab" onclick="switchTab('dashboard')">Dashboard</div>
+            <div class="tab" onclick="switchTab('data-management')">Data</div>
+
+        </div>
+        
+        <div id="study" class="content active">
+    <!-- Rediscovery banner -->
+    <div id="rediscovery-banner" class="rediscovery-banner active">
+        <div class="rediscovery-banner-text">
+            <h3 style="margin-top: 0;">Rediscover Your Repertoire</h3>
+            <p id="rediscovery-message">Some pieces in your repertoire haven't been practiced in a while and are at risk of being forgotten.</p>
+        </div>
+        <div class="rediscovery-banner-actions">
+            <button onclick="createRediscoverySession()">Start Rediscovery Session</button>
+            <button onclick="this.closest('#rediscovery-banner').classList.add('hidden')" class="secondary">Not Now</button>
+        </div>
+    </div>
+    
+    <h2>Practice Session</h2>
+    <div>
+        <select id="study-category">
+            <option value="All">All Categories</option>
+            <!-- Category options will be populated dynamically -->
+        </select>
+        <div class="checkbox-container">
+            <input type="checkbox" id="include-future" checked>
+            <label for="include-future">Include future exercises if no due exercises available</label>
+        </div>
+        <div class="checkbox-container">
+            <input type="checkbox" id="prioritize-recent" checked>
+            <label for="prioritize-recent">Prioritize recently added exercises</label>
+        </div>
+        <div class="checkbox-container">
+            <input type="checkbox" id="focus-on-difficult" checked>
+            <label for="focus-on-difficult">Focus on difficult pieces</label>
+        </div>
+        <button onclick="startStudySession()">Start Studying</button>
+    </div>
+    
+    <div id="study-container" class="study-container hidden">
+        <h3 id="current-exercise"></h3>
+        <p id="exercise-category"></p>
+        <p id="due-date"></p>
+        <div id="exercise-notes" class="hidden">
+            <p><strong>Notes:</strong> <span id="notes-content"></span></p>
+        </div>
+        <div id="technique-focus" class="hidden">
+            <p><strong>Focus on:</strong> <span id="focus-content"></span></p>
+        </div>
+        
+        <!-- Simplified Metronome -->
+        <div class="metronome-container">
+            <h3>Metronome</h3>
+            <div class="metronome-controls">
+                <button onclick="changeTempo(-5)">-</button>
+                <div class="tempo-display">
+                    <span id="tempo-value">80</span> BPM
+                </div>
+                <button onclick="changeTempo(5)">+</button>
+            </div>
+            <div>
+                <button id="metronome-toggle" onclick="toggleMetronome()">Start Metronome</button>
+            </div>
+        </div>
+        
+        <!-- Tally Counter -->
+        <div class="tally-counter">
+            <h3>Repetition Counter</h3>
+            <div class="tally-display" id="tally-display">0</div>
+            <div class="tally-controls">
+                <button onclick="updateTally(-1)">-</button>
+                <button onclick="updateTally(1)">+</button>
+                <button onclick="resetTally()">Reset</button>
+            </div>
+        </div>
+        
+        <div class="timer-container">
+            <div id="timer">00:00</div>
+            <div class="timer-controls">
+                <button onclick="startTimer()">Start Timer</button>
+                <button onclick="pauseTimer()">Pause</button>
+                <button onclick="resetTimer()">Reset</button>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div id="session-progress" class="progress"></div>
+        </div>
+        
+        <p>Rate your performance:</p>
+        
+        <div class="difficulty-selector">
+            <div class="difficulty-option" onclick="selectDifficulty(1)">Struggling</div>
+            <div class="difficulty-option" onclick="selectDifficulty(2)">Difficult</div>
+            <div class="difficulty-option" onclick="selectDifficulty(3)">Moderate</div>
+            <div class="difficulty-option" onclick="selectDifficulty(4)">Easy</div>
+            <div class="difficulty-option" onclick="selectDifficulty(5)">Mastered</div>
+        </div>
+        
+        <p>Practice Notes:</p>
+        <textarea id="practice-notes" class="notes-field" placeholder="What did you notice? What to focus on next time?"></textarea>
+        
+        <div class="assessment-buttons">
+            <button onclick="addToKeepInHands()">Keep In Hands</button>
+            <button onclick="skipExercise()" class="secondary">Skip</button>
+            <button onclick="assessPerformance()">Next Exercise</button>
+        </div>
+    </div>
+    
+    <div id="session-complete" class="study-container hidden">
+        <h3>Session Complete!</h3>
+        <p>Great job! You've completed all exercises for this session.</p>
+        <div id="session-stats" class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="exercises-completed">0</div>
+                <div>Exercises</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-time">0:00</div>
+                <div>Total Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avg-difficulty">0</div>
+                <div>Avg Difficulty</div>
+            </div>
+        </div>
+        <button onclick="startStudySession()">Start New Session</button>
+    </div>
+</div>
+        
+        <div id="manage" class="content">
+            <h2>Add New Exercise/Piece</h2>
+            <div class="section">
+                <input type="text" id="exercise-name" placeholder="Exercise/Piece Name">
+                <select id="category-select">
+                    <!-- Category options will be populated dynamically -->
+                </select>
+                <div>
+                    <select id="difficulty-level">
+                        <option value="1">Beginner</option>
+                        <option value="2">Easy</option>
+                        <option value="3" selected>Intermediate</option>
+                        <option value="4">Advanced</option>
+                        <option value="5">Expert</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="text" id="exercise-focus" placeholder="Technical Focus (e.g., arpeggios, timing)">
+                </div>
+                <div>
+                    <textarea id="exercise-notes" class="notes-field" placeholder="Notes about this exercise/piece"></textarea>
+                </div>
+                <!-- Use direct function call with no return false or alerts -->
+                <button onclick="addExercise();">Add Exercise</button>
+            </div>
+            
+            <h2>Your Repertoire</h2>
+            <select id="filter-category" onchange="filterByCategory()">
+                <option value="All">All Categories</option>
+</select>
+<select id="filter-status" onchange="filterByCategory()">
+    <option value="All">All Status</option>
+    <option value="active">Active</option>
+    <option value="maintenance">Maintenance</option>
+    <option value="neglected">Neglected</option>
+    <option value="archived">Archived</option>
+</select>
+                <!-- Category options will be populated dynamically -->
+            
+            <select id="filter-status" onchange="filterByCategory()">
+                <option value="All">All Status</option>
+                <option value="InHands">In Hands</option>
+                <option value="Due">Due Today</option>
+                <option value="Overdue">Overdue</option>
+                <option value="Future">Future</option>
+            </select>
+            
+            <div id="repertoire-list">
+                <!-- Exercises will be listed here -->
+            </div>
+        </div>
+        
+
+
+        <div id="categories" class="content">
+            <h2>Manage Categories</h2>
+            <div class="section">
+                <input type="text" id="category-name" placeholder="New Category Name">
+                <button onclick="addCategoryFromManager()">Add Category</button>
+            </div>
+            
+            <h3>Your Categories</h3>
+            <div id="categories-list" class="category-list">
+                <!-- Categories will be listed here -->
+            </div>
+        </div>
+        
+        <!-- New Practice History Tab -->
+        <div id="practice-history" class="content">
+            <h2>Practice History</h2>
+            
+            <div class="section">
+                <h3>What You've Practiced This Week</h3>
+                <div id="weekly-practice-summary">
+                    <!-- Weekly practice summary will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>Practice Log by Day</h3>
+                <div id="practice-log-by-day">
+                    <!-- Practice log grouped by day will be displayed here -->
+                </div>
+            </div>
+        </div>
+        
+
+
+
+<div id="data-management" class="content">
+    <h2>Data Management</h2>
+    
+    <div class="section">
+        <h3>Backup & Restore</h3>
+        <p>Protect your practice data by creating backups regularly. You can restore from these backups if needed.</p>
+        
+        <div class="dashboard-cards">
+<div class="dashboard-card">
+    <div class="card-value" id="neglected-count">0</div>
+    <div class="card-label">Neglected Pieces</div>
+    <button onclick="createRediscoverySession()" id="rediscovery-button" class="hidden">Rediscover</button>
+</div>
+            <div class="dashboard-card">
+                <h4>Export Data</h4>
+                <p>Save all your practice data to a file on your device.</p>
+                <button onclick="exportAppData()">Export Data</button>
+            </div>
+            
+            <div class="dashboard-card">
+                <h4>Import Data</h4>
+                <p>Restore practice data from a previously exported file.</p>
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importAppData(event)">
+                <button onclick="document.getElementById('import-file').click()">Import Data</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Automatic Backup</h3>
+        <p>The app automatically creates a backup of your data every 7 days, stored within your browser.</p>
+        
+        <div class="dashboard-cards">
+            <div class="dashboard-card">
+                <h4>Restore Auto-Backup</h4>
+                <p>Restore your data from the most recent automatic backup.</p>
+                <button onclick="restoreFromAutoBackup()">Restore Auto-Backup</button>
+            </div>
+            
+            <div class="dashboard-card">
+                <h4>Create Auto-Backup Now</h4>
+                <p>Manually trigger an automatic backup right now.</p>
+                <button onclick="autoBackupData(); alert('Automatic backup created successfully!');">Create Backup Now</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Storage Usage</h3>
+        <div id="storage-info">
+            <p>Checking storage usage...</p>
+        </div>
+        <p class="tips-container">
+            <strong>Note:</strong> Browsers typically limit local storage to 5-10MB. If you have a large repertoire, 
+            export your data regularly to prevent loss.
+        </p>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+        <div id="dashboard" class="content">
+            <h2>Practice Dashboard</h2>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="card-value" id="total-repertoire">0</div>
+                    <div class="card-label">Total Exercises</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-value" id="due-today">0</div>
+                    <div class="card-label">Due Today</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-value" id="in-hands-count">0</div>
+                    <div class="card-label">In Hands</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-value" id="mastered-count">0</div>
+                    <div class="card-label">Mastered</div>
+                </div>
+            </div>
+            
+            <h3>Recent Practice Activity</h3>
+            <div id="practice-log" class="practice-log">
+                <!-- Practice log entries will be displayed here -->
+            </div>
+            
+            <h3>Category Distribution</h3>
+            <div id="category-stats">
+                <!-- Category statistics will be displayed here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exercise Details Modal -->
+    <div id="exerciseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeExerciseModal()">&times;</span>
+            <h3 id="modal-exercise-name"></h3>
+            <p><strong>Category:</strong> <span id="modal-category"></span></p>
+            <p><strong>Current Mastery:</strong> <span id="modal-mastery"></span></p>
+            <p><strong>Next Review:</strong> <span id="modal-next-review"></span></p>
+            <div id="modal-notes-section" class="hidden">
+                <p><strong>Notes:</strong></p>
+                <div id="modal-notes"></div>
+            </div>
+            <div id="modal-focus-section" class="hidden">
+                <p><strong>Technical Focus:</strong></p>
+                <div id="modal-focus"></div>
+            </div>
+            <h4>Performance History</h4>
+            <div id="performance-history" class="performance-history">
+                <!-- Performance history will be displayed here -->
+            </div>
+
+<div class="modal-section">
+    <h4>Repertoire Status</h4>
+    <p id="modal-status">Current status: <span id="current-status">Active</span></p>
+    
+    <div class="status-options">
+        <button onclick="changeRepertoireStatus(currentExerciseId, 'active')" class="status-btn active">
+            Active
+        </button>
+        <button onclick="changeRepertoireStatus(currentExerciseId, 'maintenance')" class="status-btn maintenance">
+            Maintenance
+        </button>
+        <button onclick="changeRepertoireStatus(currentExerciseId, 'archived')" class="status-btn archived">
+            Archive
+        </button>
+    </div>
+    
+    <div id="status-help" class="tips-container">
+        <strong>Status Types:</strong>
+        <ul class="tips-list">
+            <li><strong>Active:</strong> Regular spaced repetition with standard intervals</li>
+            <li><strong>Maintenance:</strong> Longer intervals but never forgotten</li>
+            <li><strong>Archived:</strong> Removed from practice rotation</li>
+        </ul>
+    </div>
+</div>
+            <div class="modal-footer">
+                <button onclick="toggleInHands()" id="in-hands-button">Add to "In Hands"</button>
+                <button onclick="closeExerciseModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Confirm Category Removal</h3>
+            <p id="confirmMessage"></p>
+            <div class="modal-footer">
+                <button class="secondary" onclick="closeModal()">Cancel</button>
+                <button class="danger" id="confirmButton" onclick="removeConfirmedCategory()">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let repertoire = JSON.parse(localStorage.getItem('musicRepertoire')) || [];
+        let categories = JSON.parse(localStorage.getItem('musicCategories')) || ['Guitar', 'Bass', 'Piano', 'Theory', 'Technique'];
+        let practiceLog = JSON.parse(localStorage.getItem('musicPracticeLog')) || [];
+        let weeklyPlan = JSON.parse(localStorage.getItem('musicWeeklyPlan')) || {};
+        
+        // Session variables
+        let timerInterval;
+        let timerSeconds = 0;
+        let isTimerRunning = false;
+        let sessionStartTime;
+        let selectedDifficulty = 0;
+        let currentExerciseId = null;
+        
+        // Study session variables
+        let currentStudySet = [];
+        let currentIndex = 0;
+        let sessionsCompleted = 0;
+        
+        // Metronome variables - simplified
+        let metronomeInterval;
+        let isMetronomeRunning = false;
+        let tempo = 80;
+        let audioContext;
+        
+        // Tally counter variable
+        let tallyCount = 0;
+
+        // Add this new variable
+        let skippedExercises = [];
+        
+        // Category to be removed (for confirmation modal)
+        let categoryToRemove = '';
+        
+        // Initialize the app
+window.onload = function () {
+  convertOldDataFormat();
+  initializeRepertoireStatus(); // Initialize status for all pieces
+  updateCategoryDropdowns();
+  displayRepertoire();
+  displayCategories();
+  updateDashboard();
+  checkDueExercisesAndNeglectedPieces(); // Replace checkDueExercises() with this
+  displayPracticeHistory();
+
+  // New code for data persistence
+  updateStorageUsageDisplay();
+
+  // Check if it's time for an auto-backup
+  autoBackupData();
+
+  // Set up the practice history initially if we're on that tab
+  if (
+    document.getElementById("practice-history").classList.contains("active")
+  ) {
+    displayPracticeHistory();
+  }
+
+  // Add a dummy practice history entry if none exists
+  const practiceHistory =
+    JSON.parse(localStorage.getItem("musicPracticeHistory")) || [];
+  if (practiceHistory.length === 0) {
+    // Create some sample data for first-time users
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Only add sample data if repertoire has items
+    if (repertoire.length > 0) {
+      const sampleSession = {
+        date: yesterday.toISOString(),
+        duration: 1200, // 20 minutes
+        exercises: [
+          {
+            id: repertoire[0].id,
+            name: repertoire[0].name,
+            category: repertoire[0].category,
+            difficulty: 3,
+          },
+        ],
+        totalExercises: 1,
+      };
+
+      practiceHistory.push(sampleSession);
+      localStorage.setItem(
+        "musicPracticeHistory",
+        JSON.stringify(practiceHistory),
+      );
+    }
+  }
+}; // Make sure this closing brace and semicolon are here
+
+
+// Function to update the storage usage display
+function updateStorageUsageDisplay() {
+    const storageInfo = document.getElementById('storage-info');
+    if (!storageInfo) return;
+    
+    const usage = checkStorageUsage();
+    
+    storageInfo.innerHTML = `
+        <div class="dashboard-cards">
+            <div class="dashboard-card">
+                <div class="card-value">${usage.size}</div>
+                <div class="card-label">Storage Used</div>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-value">${usage.percentUsed}</div>
+                <div class="card-label">Of Available Space</div>
+            </div>
+        </div>
+    `;
+    
+    // Add warning if storage is near limit
+    if (usage.isNearLimit) {
+        const warning = document.createElement('div');
+        warning.className = 'tips-container';
+        warning.style.backgroundColor = '#ffebee';
+        warning.style.borderLeftColor = '#e53935';
+        warning.innerHTML = `
+            <strong>Warning:</strong> You're using ${usage.percentUsed} of your available storage. 
+            Please export your data to prevent potential data loss.
+        `;
+        storageInfo.appendChild(warning);
+    }
+}
+
+// Update the switchTab function to include data management
+// Replace the existing switchTab function with this one
+function switchTab(tabId) {
+    // Hide all tabs
+    document.querySelectorAll('.content').forEach(function(content) {
+        content.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab').forEach(function(tab) {
+        tab.classList.remove('active');
+    });
+    
+    // Show the selected tab
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to the clicked tab button
+    document.querySelectorAll('.tab').forEach(function(tab) {
+        if (tab.getAttribute('onclick') && 
+            tab.getAttribute('onclick').includes(`switchTab('${tabId}')`)) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // Refresh data when switching tabs
+    if (tabId === 'manage') {
+        displayRepertoire();
+    } else if (tabId === 'categories') {
+        displayCategories();
+    } else if (tabId === 'dashboard') {
+        updateDashboard();
+    } else if (tabId === 'practice-history') {
+        displayPracticeHistory();
+    } else if (tabId === 'data-management') {
+        updateStorageUsageDisplay();
+    }
+}
+        
+        // Convert old data format to new format if needed
+        function convertOldDataFormat() {
+            let needsUpdate = false;
+            
+            repertoire.forEach(item => {
+                // Add difficulty if not present
+                if (typeof item.difficulty === 'undefined') {
+                    item.difficulty = 3; // Default to intermediate
+                    needsUpdate = true;
+                }
+                
+                // Add notes if not present
+                if (typeof item.notes === 'undefined') {
+                    item.notes = '';
+                    needsUpdate = true;
+                }
+                
+                // Add technical focus if not present
+                if (typeof item.technicalFocus === 'undefined') {
+                    item.technicalFocus = '';
+                    needsUpdate = true;
+                }
+                
+                // Add in hands status if not present
+                if (typeof item.inHands === 'undefined') {
+                    item.inHands = false;
+                    needsUpdate = true;
+                }
+                
+                // Add performance history if not present
+                if (typeof item.performanceHistory === 'undefined') {
+                    item.performanceHistory = [];
+                    needsUpdate = true;
+                }
+                
+                // Add decay factor if not present
+                if (typeof item.decayFactor === 'undefined') {
+                    item.decayFactor = 1.0;
+                    needsUpdate = true;
+                }
+                
+                // Add mastery level if not present
+                if (typeof item.masteryLevel === 'undefined') {
+                    // Calculate based on review count and interval
+                    const masteryEstimate = Math.min(5, Math.ceil((item.interval || 1) / 6));
+                    item.masteryLevel = masteryEstimate;
+                    needsUpdate = true;
+                }
+                
+                // Add tally count if not present
+                if (typeof item.tallyCount === 'undefined') {
+                    item.tallyCount = 0;
+                    needsUpdate = true;
+                }
+            });
+            
+            if (needsUpdate) {
+                localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+            }
+        }
+        
+        // Display categories for management
+        function displayCategories() {
+            const categoriesList = document.getElementById('categories-list');
+            categoriesList.innerHTML = '';
+            
+            if (categories.length === 0) {
+                categoriesList.innerHTML = '<p>No categories added yet.</p>';
+                return;
+            }
+            
+            const sortedCategories = [...categories].sort();
+            
+            sortedCategories.forEach(category => {
+                const div = document.createElement('div');
+                div.className = 'category-item';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = category;
+                
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.className = 'danger';
+                removeButton.onclick = function() {
+                    confirmRemoveCategory(category);
+                };
+                
+                div.appendChild(nameSpan);
+                div.appendChild(removeButton);
+                categoriesList.appendChild(div);
+            });
+        }
+        
+        // Add a new category from category manager
+        function addCategoryFromManager() {
+            const categoryName = document.getElementById('category-name').value.trim();
+            
+            if (!categoryName) {
+                alert('Please enter a category name');
+                return;
+            }
+            
+            if (!categories.includes(categoryName)) {
+                categories.push(categoryName);
+                localStorage.setItem('musicCategories', JSON.stringify(categories));
+                updateCategoryDropdowns();
+                displayCategories();
+                document.getElementById('category-name').value = '';
+                alert(`Added new category: ${categoryName}`);
+            } else {
+                alert('This category already exists');
+            }
+        }
+        
+        // Show confirmation modal for category removal
+        function confirmRemoveCategory(category) {
+            const countInCategory = repertoire.filter(item => item.category === category).length;
+            
+            const confirmMessage = document.getElementById('confirmMessage');
+            confirmMessage.innerHTML = `Are you sure you want to remove the category "${category}"?<br>
+                                       ${countInCategory} exercises are currently in this category.${
+                                       countInCategory > 0 ? '<br>These exercises will NOT be deleted, but will no longer have a category.' : ''}`;
+            
+            categoryToRemove = category;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+        
+        // Remove the confirmed category
+        function removeConfirmedCategory() {
+            if (!categoryToRemove) return;
+            
+            // Update exercises in this category
+            repertoire.forEach(item => {
+                if (item.category === categoryToRemove) {
+                    item.category = "Uncategorized";
+                }
+            });
+            
+            // If "Uncategorized" isn't already a category, add it (if needed)
+            if (repertoire.some(item => item.category === "Uncategorized") && 
+                !categories.includes("Uncategorized")) {
+                categories.push("Uncategorized");
+            }
+            
+            // Remove the category
+            categories = categories.filter(cat => cat !== categoryToRemove);
+            
+            // Save changes
+            localStorage.setItem('musicCategories', JSON.stringify(categories));
+            localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+            
+            // Update UI
+            updateCategoryDropdowns();
+            displayCategories();
+            displayRepertoire();
+            updateDashboard();
+            
+            // Close modal
+            closeModal();
+            categoryToRemove = '';
+        }  //ok
+        
+        // Close the modal
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+        
+        // Add a new exercise
+        function addExercise() {
+            try {
+                // Check if elements exist
+                const nameInput = document.getElementById('exercise-name');
+                if (!nameInput) return;
+                
+                const categorySelect = document.getElementById('category-select');
+                if (!categorySelect) return;
+                
+                const difficultyLevel = document.getElementById('difficulty-level');
+                if (!difficultyLevel) return;
+                
+                const focusInput = document.getElementById('exercise-focus');
+                if (!focusInput) return;
+                
+                const notesInput = document.getElementById('exercise-notes');
+                if (!notesInput) return;
+                
+                // Get values safely
+                const name = nameInput.value ? nameInput.value.trim() : "";
+                const category = categorySelect.value || categories[0] || "Uncategorized";
+                const difficulty = parseInt(difficultyLevel.value || "3");
+                const technicalFocus = focusInput.value ? focusInput.value.trim() : "";
+                const notes = notesInput.value ? notesInput.value.trim() : "";
+                
+                if (!name) {
+                    alert('Please enter an exercise name');
+                    return;
+                }
+                
+                // Add the new exercise with SRS data
+                const today = new Date();
+                const newExercise = {
+                    id: Date.now(),
+                    name: name,
+                    category: category,
+                    difficulty: difficulty,
+                    technicalFocus: technicalFocus,
+                    notes: notes,
+                    interval: 1, // 1 day initial interval
+                    nextReview: today.toISOString().split('T')[0], // Due today
+                    reviewCount: 0,
+                    inHands: true, // Automatically add new exercises to "in hands"
+                    masteryLevel: 1, // Start at beginner level
+                    decayFactor: 1.0, // Default decay factor
+                    performanceHistory: [],
+                    dateAdded: today.toISOString(),
+                    tallyCount: 0 // Initialize tally count
+                };
+                
+                // Update the repertoire array
+                if (!Array.isArray(repertoire)) {
+                    repertoire = [];
+                }
+                
+                repertoire.push(newExercise);
+                
+                // Save to localStorage
+                try {
+                    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+                } catch (storageError) {
+                    return;
+                }
+                
+                // Add to practice log
+                try {
+                    addToPracticeLog(`Added new ${category} exercise: ${name}`);
+                } catch (logError) {
+                    // Continue even if logging fails
+                }
+                
+                // Reset form
+                nameInput.value = '';
+                focusInput.value = '';
+                notesInput.value = '';
+                
+                // Update displays
+                try {
+                    displayRepertoire();
+                } catch (displayError) {
+                    // Continue even if display update fails
+                }
+                
+                try {
+                    updateDashboard();
+                } catch (dashboardError) {
+                    // Continue even if dashboard update fails
+                }
+            } catch (error) {
+                // Silent error handling
+            }
+        }
+        
+        // Remove an exercise
+        function removeExercise(id) {
+            const exercise = repertoire.find(item => item.id === id);
+            if (exercise) {
+                if (confirm(`Are you sure you want to remove "${exercise.name}"?`)) {
+                    repertoire = repertoire.filter(item => item.id !== id);
+                    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+                    displayRepertoire();
+                    updateDashboard();
+                    updateRescheduleExerciseDropdown();
+                    
+                    // Add to practice log
+                    addToPracticeLog(`Removed exercise: ${exercise.name}`);
+                }
+            }
+        }
+        
+        // Update category dropdowns
+        function updateCategoryDropdowns() {
+            const dropdowns = ['category-select', 'filter-category', 'study-category'];
+            
+            dropdowns.forEach(id => {
+                const dropdown = document.getElementById(id);
+                if (!dropdown) return; // Skip if element doesn't exist
+                
+                const currentValue = dropdown.value;
+                
+                // Clear options except the 'All' option for filter dropdowns
+                dropdown.innerHTML = '';
+                
+                if (id !== 'category-select') {
+                    const allOption = document.createElement('option');
+                    allOption.value = 'All';
+                    allOption.textContent = 'All Categories';
+                    dropdown.appendChild(allOption);
+                }
+                
+                // Sort categories alphabetically
+                const sortedCategories = [...categories].sort();
+                
+                // Add category options
+                sortedCategories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    dropdown.appendChild(option);
+                });
+                
+                // Try to restore previous value
+                if (categories.includes(currentValue) || currentValue === 'All') {
+                    dropdown.value = currentValue;
+                }
+            });
+        }
+        
+        // Display the repertoire list, filtered if needed
+       function displayRepertoire() {
+    const list = document.getElementById('repertoire-list');
+    const filterCategory = document.getElementById('filter-category').value;
+    const filterStatus = document.getElementById('filter-status').value;
+    const today = new Date().toISOString().split('T')[0];
+    
+    list.innerHTML = '';
+    
+    // Apply filters
+    let filteredList = repertoire;
+    
+    if (filterCategory !== 'All') {
+        filteredList = filteredList.filter(item => item.category === filterCategory);
+    }
+    
+    if (filterStatus !== 'All') {
+        filteredList = filteredList.filter(item => item.status === filterStatus);
+    }
+    
+    // Sort by status, then next review date, then by name
+    filteredList.sort((a, b) => {
+        // First priority: Neglected pieces
+        if (a.status === REPERTOIRE_STATUS.NEGLECTED && b.status !== REPERTOIRE_STATUS.NEGLECTED) return -1;
+        if (b.status === REPERTOIRE_STATUS.NEGLECTED && a.status !== REPERTOIRE_STATUS.NEGLECTED) return 1;
+        
+        // Second priority: Status order (active, maintenance, archived)
+        const statusOrder = {
+            'active': 1,
+            'maintenance': 2,
+            'archived': 3
+        };
+        
+        const aStatusOrder = statusOrder[a.status] || 1;
+        const bStatusOrder = statusOrder[b.status] || 1;
+        
+        if (aStatusOrder !== bStatusOrder) {
+            return aStatusOrder - bStatusOrder;
+        }
+        
+        // Third priority: next review date
+        if (a.nextReview !== b.nextReview) {
+            return new Date(a.nextReview) - new Date(b.nextReview);
+        }
+        
+        // Last priority: name
+        return a.name.localeCompare(b.name);
+    });
+    
+    if (filteredList.length === 0) {
+        list.innerHTML = '<p>No exercises match your filters.</p>';
+        return;
+    }
+    
+    filteredList.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        
+        // Set priority coloring
+        if (item.status === REPERTOIRE_STATUS.NEGLECTED) {
+            div.className += ' priority-high';
+        } else if (item.inHands) {
+            div.className += ' priority-high';
+        } else if (item.nextReview < today && item.status !== REPERTOIRE_STATUS.ARCHIVED) {
+            div.className += ' priority-medium';
+        } else if (item.nextReview === today && item.status !== REPERTOIRE_STATUS.ARCHIVED) {
+            div.className += ' priority-low';
+        }
+        
+        const details = document.createElement('div');
+        details.className = 'item-details';
+        
+        const titleRow = document.createElement('div');
+        
+        // Status indicator
+        const statusDot = document.createElement('span');
+        statusDot.className = `status-indicator status-${item.status || 'active'}`;
+        statusDot.title = item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : 'Active';
+        titleRow.appendChild(statusDot);
+        
+        // Mastery level
+        const masteryDot = document.createElement('span');
+        masteryDot.className = `mastery-level mastery-${item.masteryLevel || 1}`;
+        titleRow.appendChild(masteryDot);
+        
+        const categorySpan = document.createElement('span');
+        categorySpan.className = 'category-tag';
+        categorySpan.textContent = item.category;
+        titleRow.appendChild(categorySpan);
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = item.name;
+        if (item.inHands) {
+            const handIcon = document.createElement('span');
+            handIcon.innerHTML = ' 👐';
+            handIcon.title = 'In Hands';
+            nameSpan.appendChild(handIcon);
+        }
+        titleRow.appendChild(nameSpan);
+        
+        details.appendChild(titleRow);
+        
+        const nextReviewSpan = document.createElement('div');
+        nextReviewSpan.style.fontSize = '0.8em';
+        
+        // Format the status message based on status
+        let statusMessage = '';
+        if (item.status === REPERTOIRE_STATUS.ARCHIVED) {
+            statusMessage = 'Archived';
+            nextReviewSpan.style.color = '#9e9e9e';
+        } else if (item.status === REPERTOIRE_STATUS.NEGLECTED) {
+            const daysNeglected = Math.floor((new Date() - new Date(item.neglectedDate || item.lastPracticed)) / (1000 * 60 * 60 * 24));
+            statusMessage = `Neglected for ${daysNeglected} day${daysNeglected !== 1 ? 's' : ''}`;
+            nextReviewSpan.style.color = '#ff9800';
+        } else if (item.nextReview < today) {
+            const daysOverdue = Math.floor((new Date() - new Date(item.nextReview)) / (1000 * 60 * 60 * 24));
+            statusMessage = `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
+            nextReviewSpan.style.color = '#e53935';
+        } else if (item.nextReview === today) {
+            statusMessage = 'Due today';
+            nextReviewSpan.style.color = '#ff9800';
+        } else {
+            const daysUntil = Math.floor((new Date(item.nextReview) - new Date()) / (1000 * 60 * 60 * 24));
+            statusMessage = `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+        }
+        
+        nextReviewSpan.textContent = statusMessage;
+        details.appendChild(nextReviewSpan);
+        
+        // Add click to view details
+        details.style.cursor = 'pointer';
+        details.onclick = function() {
+            showExerciseDetails(item.id);
+        };
+        
+        const buttonsDiv = document.createElement('div');
+        
+        // Only show practice button for non-archived items
+        if (item.status !== REPERTOIRE_STATUS.ARCHIVED) {
+            const practiceButton = document.createElement('button');
+            practiceButton.textContent = 'Practice';
+            practiceButton.className = 'success';
+            practiceButton.onclick = function(e) {
+                e.stopPropagation();
+                practiceSingleExercise(item.id);
+            };
+            buttonsDiv.appendChild(practiceButton);
+        }
+        
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'danger';
+        removeButton.onclick = function(e) {
+            e.stopPropagation();
+            removeExercise(item.id);
+        };
+        buttonsDiv.appendChild(removeButton);
+        
+        div.appendChild(details);
+        div.appendChild(buttonsDiv);
+        list.appendChild(div);
+    });
+}
+        
+        // Filter repertoire by category
+        function filterByCategory() {
+            displayRepertoire();
+        }
+        
+        // Show exercise details in modal
+       function showExerciseDetails(id) {
+    const exercise = repertoire.find(item => item.id === id);
+    if (!exercise) return;
+    
+    currentExerciseId = id;
+    
+    // Populate modal
+    document.getElementById('modal-exercise-name').textContent = exercise.name;
+    document.getElementById('modal-category').textContent = exercise.category;
+    document.getElementById('modal-mastery').innerHTML = getMasteryDisplayHTML(exercise.masteryLevel);
+    document.getElementById('modal-next-review').textContent = formatReviewDate(exercise.nextReview);
+    
+    // Update status display
+    const currentStatus = document.getElementById('current-status');
+    if (currentStatus) {
+        const statusText = exercise.status ? 
+            exercise.status.charAt(0).toUpperCase() + exercise.status.slice(1) : 
+            'Active';
+        currentStatus.textContent = statusText;
+        
+        // Highlight the current status button
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.textContent.trim().toLowerCase() === (exercise.status || 'active')) {
+                btn.classList.add('selected');
+            }
+        });
+    }
+    
+    // Notes section
+    const notesSection = document.getElementById('modal-notes-section');
+    const notesContent = document.getElementById('modal-notes');
+    if (exercise.notes) {
+        notesContent.textContent = exercise.notes;
+        notesSection.classList.remove('hidden');
+    } else {
+        notesSection.classList.add('hidden');
+    }
+    
+    // Technical focus section
+    const focusSection = document.getElementById('modal-focus-section');
+    const focusContent = document.getElementById('modal-focus');
+    if (exercise.technicalFocus) {
+        focusContent.textContent = exercise.technicalFocus;
+        focusSection.classList.remove('hidden');
+    } else {
+        focusSection.classList.add('hidden');
+    }
+    
+    // Performance history
+    const historyContainer = document.getElementById('performance-history');
+    historyContainer.innerHTML = '';
+    
+    if (exercise.performanceHistory && exercise.performanceHistory.length > 0) {
+        exercise.performanceHistory.slice().reverse().forEach(entry => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            const date = new Date(entry.date);
+            const formattedDate = date.toLocaleDateString();
+            
+            historyItem.innerHTML = `
+                <strong>${formattedDate}</strong>: 
+                Rating: ${getDifficultyLabel(entry.difficulty)}
+                ${entry.notes ? `<br><em>${entry.notes}</em>` : ''}
+            `;
+            
+            historyContainer.appendChild(historyItem);
+        });
+    } else {
+        historyContainer.innerHTML = '<p>No practice history yet.</p>';
+    }
+    
+    // Update In Hands button
+    const inHandsButton = document.getElementById('in-hands-button');
+    if (inHandsButton) {
+        // Don't show in-hands option for archived pieces
+        if (exercise.status === REPERTOIRE_STATUS.ARCHIVED) {
+            inHandsButton.style.display = 'none';
+        } else {
+            inHandsButton.style.display = 'inline-block';
+            if (exercise.inHands) {
+                inHandsButton.textContent = 'Remove from "In Hands"';
+                inHandsButton.className = 'secondary';
+            } else {
+                inHandsButton.textContent = 'Add to "In Hands"';
+                inHandsButton.className = '';
+            }
+        }
+    }
+    
+    // Show modal
+    document.getElementById('exerciseModal').style.display = 'block';
+}
+        
+        // Toggle In Hands status
+        function toggleInHands() {
+            if (!currentExerciseId) return;
+            
+            const index = repertoire.findIndex(item => item.id === currentExerciseId);
+            if (index === -1) return;
+            
+            // Toggle status
+            repertoire[index].inHands = !repertoire[index].inHands;
+            
+            // Save changes
+            localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+            
+            // Add to practice log
+            const status = repertoire[index].inHands ? 'Added to' : 'Removed from';
+            addToPracticeLog(`${status} "In Hands": ${repertoire[index].name}`);
+            
+            // Update UI
+            closeExerciseModal();
+            displayRepertoire();
+            updateDashboard();
+        }
+        
+        // Format review date
+        function formatReviewDate(dateStr) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (dateStr < today) {
+                const daysOverdue = Math.floor((new Date() - new Date(dateStr)) / (1000 * 60 * 60 * 24));
+                return `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
+            } else if (dateStr === today) {
+                return 'Due today';
+            } else {
+                const daysUntil = Math.floor((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24));
+                return `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+            }
+        }
+        
+        // Get display for mastery level
+        function getMasteryDisplayHTML(level) {
+            const labels = ['Beginner', 'Elementary', 'Intermediate', 'Advanced', 'Expert'];
+            const colors = ['#e53935', '#ff9800', '#4caf50', '#2196f3', '#9c27b0'];
+            
+            level = Math.max(1, Math.min(5, level || 1)); // Ensure level is between 1-5
+            
+            return `<span style="color: ${colors[level-1]}">
+                        ${labels[level-1]} (Level ${level})
+                    </span>`;
+        }
+        
+        // Practice a single exercise
+        function practiceSingleExercise(id) {
+            const exercise = repertoire.find(item => item.id === id);
+            if (!exercise) return;
+            
+            // Set up single exercise study session
+            currentStudySet = [exercise];
+            currentIndex = 0;
+            
+            // Switch to study tab and show the exercise
+            switchTab('study');
+            showCurrentExercise();
+            document.getElementById('study-container').classList.remove('hidden');
+            document.getElementById('session-complete').classList.add('hidden');
+            
+            // Reset tally counter to stored value for this exercise
+            tallyCount = exercise.tallyCount || 0;
+            updateTallyDisplay();
+            
+            // Start the timer
+            resetTimer();
+            startTimer();
+        }
+        
+        // Get difficulty label
+        function getDifficultyLabel(level) {
+            const labels = ['Struggling', 'Difficult', 'Moderate', 'Easy', 'Mastered'];
+            return labels[level - 1] || 'Unknown';
+        }
+        
+        // Start a study session
+function startStudySession() {
+    // Get all filter options
+    const category = document.getElementById('study-category').value;
+    
+    // Explicitly check if the checkbox exists and what its value is
+    const includeFutureCheckbox = document.getElementById('include-future');
+    let includeFuture = false;
+    
+    if (includeFutureCheckbox) {
+        includeFuture = includeFutureCheckbox.checked;
+        console.log("Include future checkbox exists and value is:", includeFuture);
+    } else {
+        console.error("Could not find checkbox with ID 'include-future'");
+    }
+    
+    const prioritizeRecent = document.getElementById('prioritize-recent').checked;
+    const focusOnDifficult = document.getElementById('focus-on-difficult').checked;
+    skippedExercises = [];
+    const today = new Date().toISOString().split('T')[0];
+    console.log("Today's date for comparison:", today);
+    
+    // Reset session variables
+    selectedDifficulty = 0;
+    document.querySelectorAll('.difficulty-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Record session start time
+    sessionStartTime = new Date();
+    
+    // Stop any running timer
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    resetTimer();
+    
+    // Check total number of exercises
+    console.log("Total exercises in repertoire:", repertoire.length);
+    
+    // Get exercises due for review today
+    let dueToday = repertoire.filter(item => {
+        // Skip archived pieces
+        if (item.status === REPERTOIRE_STATUS.ARCHIVED) {
+            return false;
+        }
+        
+        // Filter by category if needed
+        if (category !== 'All' && item.category !== category) {
+            return false;
+        }
+        
+        return item.nextReview <= today;
+    });
+    
+    console.log("Due today count:", dueToday.length);
+    
+    // Always include "In Hands" exercises
+    let inHandsExercises = repertoire.filter(item => {
+        // Skip archived pieces
+        if (item.status === REPERTOIRE_STATUS.ARCHIVED) {
+            return false;
+        }
+        
+        // Filter by category if needed
+        if (category !== 'All' && item.category !== category) {
+            return false;
+        }
+        
+        return item.inHands;
+    });
+    
+    console.log("In hands count:", inHandsExercises.length);
+    
+    // Combine and remove duplicates
+    let combinedSet = [...dueToday];
+    
+    // Add in-hands exercises that aren't already in the due set
+    inHandsExercises.forEach(item => {
+        if (!combinedSet.some(exercise => exercise.id === item.id)) {
+            combinedSet.push(item);
+        }
+    });
+    
+    console.log("Combined set count (due + in hands):", combinedSet.length);
+    
+    // Sort by priority (existing code)...
+    
+    currentStudySet = [...combinedSet];
+    
+    console.log("Current study set count before future check:", currentStudySet.length);
+    console.log("Include future setting:", includeFuture);
+    
+    // If no exercises are due today and include future is checked
+    if (currentStudySet.length === 0 && includeFuture) {
+        console.log("No due exercises, checking for future exercises");
+        
+        // Count future exercises first
+        const futureCount = repertoire.filter(item => {
+            if (item.status === REPERTOIRE_STATUS.ARCHIVED) return false;
+            if (category !== 'All' && item.category !== category) return false;
+            return item.nextReview > today;
+        }).length;
+        
+        console.log("Future exercises available:", futureCount);
+        
+        // Now get the actual future exercises
+        let futureExercises = repertoire.filter(item => {
+            // Skip archived pieces
+            if (item.status === REPERTOIRE_STATUS.ARCHIVED) {
+                return false;
+            }
+            
+            // Filter by category if needed
+            if (category !== 'All' && item.category !== category) {
+                return false;
+            }
+            
+            console.log(`Exercise ${item.name} due date: ${item.nextReview} (${item.nextReview > today ? 'FUTURE' : 'NOT FUTURE'})`);
+            
+            // Select future exercises (due after today)
+            return item.nextReview > today;
+        });
+        
+        console.log("Future exercises found:", futureExercises.length);
+        if (futureExercises.length > 0) {
+            console.log("First future exercise:", futureExercises[0].name, "due", futureExercises[0].nextReview);
+        }
+        
+        // Sort by soonest due
+        futureExercises.sort((a, b) => {
+            return new Date(a.nextReview) - new Date(b.nextReview);
+        });
+        
+        // Add some future exercises
+        currentStudySet = futureExercises.slice(0, 5); // Take top 5 future exercises
+        console.log("Added future exercises, new study set count:", currentStudySet.length);
+    }
+    
+    currentIndex = 0;
+    
+    if (currentStudySet.length === 0) {
+        console.log("No exercises to study");
+        document.getElementById('study-container').classList.add('hidden');
+        document.getElementById('session-complete').classList.remove('hidden');
+        document.getElementById('exercises-completed').textContent = "0";
+        document.getElementById('total-time').textContent = "0:00";
+        document.getElementById('avg-difficulty').textContent = "N/A";
+        alert("No exercises to study in this category. Try selecting a different category or adding new exercises.");
+        return;
+    }
+    
+    // Start the timer
+    startTimer();
+    
+    showCurrentExercise();
+    document.getElementById('study-container').classList.remove('hidden');
+    document.getElementById('session-complete').classList.add('hidden');
+    
+    // Update session progress
+    updateSessionProgress();
+}
+        
+        // Show the current exercise
+        function showCurrentExercise() {
+            if (currentIndex >= currentStudySet.length) return;
+            
+            const exercise = currentStudySet[currentIndex];
+            document.getElementById('current-exercise').textContent = exercise.name;
+            document.getElementById('exercise-category').textContent = `Category: ${exercise.category}`;
+            
+            // Reset practice notes
+            document.getElementById('practice-notes').value = '';
+            
+            // Reset difficulty selection
+            selectedDifficulty = 0;
+            document.querySelectorAll('.difficulty-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Set tally counter to stored value
+            tallyCount = exercise.tallyCount || 0;
+            updateTallyDisplay();
+            
+            // Display notes if available
+            const notesElement = document.getElementById('exercise-notes');
+            const notesContent = document.getElementById('notes-content');
+            if (exercise.notes) {
+                notesContent.textContent = exercise.notes;
+                notesElement.classList.remove('hidden');
+            } else {
+                notesElement.classList.add('hidden');
+            }
+            
+            // Display technical focus if available
+            const focusElement = document.getElementById('technique-focus');
+            const focusContent = document.getElementById('focus-content');
+            if (exercise.technicalFocus) {
+                focusContent.textContent = exercise.technicalFocus;
+                focusElement.classList.remove('hidden');
+            } else {
+                focusElement.classList.add('hidden');
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            if (exercise.nextReview < today) {
+                const daysOverdue = Math.floor((new Date() - new Date(exercise.nextReview)) / (1000 * 60 * 60 * 24));
+                document.getElementById('due-date').textContent = `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
+                document.getElementById('due-date').style.color = '#e53935';
+            } else if (exercise.nextReview === today) {
+                document.getElementById('due-date').textContent = `Due today`;
+                document.getElementById('due-date').style.color = '#ff9800';
+            } else {
+                const daysUntil = Math.floor((new Date(exercise.nextReview) - new Date()) / (1000 * 60 * 60 * 24));
+                document.getElementById('due-date').textContent = `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''} (practicing ahead of schedule)`;
+                document.getElementById('due-date').style.color = '#4caf50';
+            }
+            
+            // Update session progress
+            updateSessionProgress();
+        }
+        
+        // Update session progress bar
+        function updateSessionProgress() {
+            const progressBar = document.getElementById('session-progress');
+            const progressPercent = currentStudySet.length > 0 ? 
+                (currentIndex / currentStudySet.length) * 100 : 0;
+            
+            progressBar.style.width = `${progressPercent}%`;
+        }
+        
+        // Select difficulty level
+        function selectDifficulty(level) {
+            selectedDifficulty = level;
+            
+            // Update UI
+            document.querySelectorAll('.difficulty-option').forEach((option, index) => {
+                if (index + 1 === level) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Add exercise to "Keep In Hands"
+        function addToKeepInHands() {
+            if (currentIndex >= currentStudySet.length) return;
+            
+            const exercise = currentStudySet[currentIndex];
+            const exerciseIndex = repertoire.findIndex(item => item.id === exercise.id);
+            
+            // Set inHands flag to true
+            repertoire[exerciseIndex].inHands = true;
+            
+            // Store the tally count with the exercise
+            repertoire[exerciseIndex].tallyCount = tallyCount;
+            
+            // Add to practice log
+            addToPracticeLog(`Added to "In Hands": ${exercise.name}`);
+            
+            // Save changes
+            localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+            
+            // Continue with assessment
+            assessPerformance();
+        }
+        
+        // Assess performance and apply enhanced SRS algorithm
+        function showExerciseDetails(id) {
+    const exercise = repertoire.find(item => item.id === id);
+    if (!exercise) return;
+    
+    currentExerciseId = id;
+    
+    // Populate modal
+    document.getElementById('modal-exercise-name').textContent = exercise.name;
+    document.getElementById('modal-category').textContent = exercise.category;
+    document.getElementById('modal-mastery').innerHTML = getMasteryDisplayHTML(exercise.masteryLevel);
+    document.getElementById('modal-next-review').textContent = formatReviewDate(exercise.nextReview);
+    
+    // Update status display
+    const currentStatus = document.getElementById('current-status');
+    if (currentStatus) {
+        const statusText = exercise.status ? 
+            exercise.status.charAt(0).toUpperCase() + exercise.status.slice(1) : 
+            'Active';
+        currentStatus.textContent = statusText;
+        
+        // Highlight the current status button
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.textContent.trim().toLowerCase() === (exercise.status || 'active')) {
+                btn.classList.add('selected');
+            }
+        });
+    }
+    
+    // Notes section
+    const notesSection = document.getElementById('modal-notes-section');
+    const notesContent = document.getElementById('modal-notes');
+    if (exercise.notes) {
+        notesContent.textContent = exercise.notes;
+        notesSection.classList.remove('hidden');
+    } else {
+        notesSection.classList.add('hidden');
+    }
+    
+    // Technical focus section
+    const focusSection = document.getElementById('modal-focus-section');
+    const focusContent = document.getElementById('modal-focus');
+    if (exercise.technicalFocus) {
+        focusContent.textContent = exercise.technicalFocus;
+        focusSection.classList.remove('hidden');
+    } else {
+        focusSection.classList.add('hidden');
+    }
+    
+    // Performance history
+    const historyContainer = document.getElementById('performance-history');
+    historyContainer.innerHTML = '';
+    
+    if (exercise.performanceHistory && exercise.performanceHistory.length > 0) {
+        exercise.performanceHistory.slice().reverse().forEach(entry => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            const date = new Date(entry.date);
+            const formattedDate = date.toLocaleDateString();
+            
+            historyItem.innerHTML = `
+                <strong>${formattedDate}</strong>: 
+                Rating: ${getDifficultyLabel(entry.difficulty)}
+                ${entry.notes ? `<br><em>${entry.notes}</em>` : ''}
+            `;
+            
+            historyContainer.appendChild(historyItem);
+        });
+    } else {
+        historyContainer.innerHTML = '<p>No practice history yet.</p>';
+    }
+    
+    // Update In Hands button
+    const inHandsButton = document.getElementById('in-hands-button');
+    if (inHandsButton) {
+        // Don't show in-hands option for archived pieces
+        if (exercise.status === REPERTOIRE_STATUS.ARCHIVED) {
+            inHandsButton.style.display = 'none';
+        } else {
+            inHandsButton.style.display = 'inline-block';
+            if (exercise.inHands) {
+                inHandsButton.textContent = 'Remove from "In Hands"';
+                inHandsButton.className = 'secondary';
+            } else {
+                inHandsButton.textContent = 'Add to "In Hands"';
+                inHandsButton.className = '';
+            }
+        }
+    }
+    
+    // Show modal
+    document.getElementById('exerciseModal').style.display = 'block';
+}
+        
+        // Complete the study session
+        function completeSession() {
+    // Stop timer
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    // Stop metronome
+    stopMetronome();
+    
+    document.getElementById('study-container').classList.add('hidden');
+    document.getElementById('session-complete').classList.remove('hidden');
+    
+    // Calculate session stats
+    const exercisesCompleted = currentIndex - skippedExercises.length;
+    document.getElementById('exercises-completed').textContent = exercisesCompleted;
+    
+    // Format elapsed time
+    const formattedTime = formatTime(timerSeconds);
+    document.getElementById('total-time').textContent = formattedTime;
+    
+    // Calculate average difficulty
+    let totalDifficulty = 0;
+    let difficultyRatings = 0;
+    
+    // Get the completed exercises
+    const completedExercises = [];
+    
+    // Count completed exercises' difficulty
+    for (let i = 0; i < currentIndex; i++) {
+        const exerciseId = currentStudySet[i].id;
+        const exercise = repertoire.find(item => item.id === exerciseId);
+        
+        // Skip counting skipped exercises
+        if (skippedExercises.some(skipped => skipped.id === exerciseId)) {
+            continue;
+        }
+        
+        if (exercise && exercise.performanceHistory && exercise.performanceHistory.length > 0) {
+            const latestPerformance = exercise.performanceHistory[exercise.performanceHistory.length - 1];
+            totalDifficulty += latestPerformance.difficulty;
+            difficultyRatings++;
+            
+            // Add to completed exercises
+            completedExercises.push({
+                id: exercise.id,
+                name: exercise.name,
+                category: exercise.category,
+                difficulty: latestPerformance.difficulty
+            });
+        }
+    }
+    
+    const avgDifficulty = difficultyRatings > 0 ? (totalDifficulty / difficultyRatings).toFixed(1) : "N/A";
+    document.getElementById('avg-difficulty').textContent = avgDifficulty;
+    
+    // Show skipped exercises count if any were skipped
+    const skippedCount = skippedExercises.length;
+    updateSkippedExercisesDisplay(skippedCount);
+    
+    // Record session in practice history
+    const now = new Date();
+    const sessionData = {
+        date: now.toISOString(),
+        duration: timerSeconds,
+        exercises: completedExercises,
+        skippedExercises: skippedExercises,
+        totalExercises: exercisesCompleted,
+        totalSkipped: skippedCount
+    };
+    
+    // Get existing practice history
+    let practiceHistory = JSON.parse(localStorage.getItem('musicPracticeHistory')) || [];
+    practiceHistory.push(sessionData);
+    localStorage.setItem('musicPracticeHistory', JSON.stringify(practiceHistory));
+    
+    // Add session completion to practice log
+    const sessionTime = formattedTime;
+    const skippedText = skippedCount > 0 ? `, skipped ${skippedCount}` : '';
+    addToPracticeLog(`Completed practice session: ${exercisesCompleted} exercises in ${sessionTime}${skippedText}`);
+    
+    // Update dashboard
+    updateDashboard();
+    
+    // Increment session counter
+    sessionsCompleted++;
+    
+    // Update practice history display if visible
+    if (document.getElementById('practice-history').classList.contains('active')) {
+        displayPracticeHistory();
+    }
+}
+        
+        // Start the timer
+        function startTimer() {
+            if (!timerInterval) {
+                timerInterval = setInterval(updateTimer, 1000);
+                isTimerRunning = true;
+            }
+        }
+        
+        // Pause the timer
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isTimerRunning = false;
+            }
+        }
+        
+        // Reset the timer
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = 0;
+            updateTimerDisplay();
+        }
+        
+        // Update the timer
+        function updateTimer() {
+            timerSeconds++;
+            updateTimerDisplay();
+        }
+        
+        // Update timer display
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = formatTime(timerSeconds);
+        }
+        
+        // Format time in MM:SS format
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Add entry to practice log
+        function addToPracticeLog(message) {
+            const now = new Date();
+            
+            practiceLog.unshift({
+                date: now.toISOString(),
+                message: message
+            });
+            
+            // Keep log to reasonable size
+            if (practiceLog.length > 100) {
+                practiceLog = practiceLog.slice(0, 100);
+            }
+            
+            localStorage.setItem('musicPracticeLog', JSON.stringify(practiceLog));
+            
+            // Update dashboard if visible
+            if (document.getElementById('dashboard').classList.contains('active')) {
+                updateDashboard();
+            }
+        }
+        
+        // Update dashboard
+        function updateDashboard() {
+    // Count statistics
+    const today = new Date().toISOString().split('T')[0];
+    
+    const totalCount = repertoire.length;
+    const dueCount = repertoire.filter(item => 
+        item.nextReview <= today && 
+        item.status !== REPERTOIRE_STATUS.ARCHIVED
+    ).length;
+    const inHandsCount = repertoire.filter(item => item.inHands).length;
+    const masteredCount = repertoire.filter(item => item.masteryLevel >= 4).length;
+    const neglectedCount = repertoire.filter(item => 
+        item.status === REPERTOIRE_STATUS.NEGLECTED
+    ).length;
+    
+    // Get status summary
+    const statusSummary = getRepertoireStatusSummary();
+    
+    // Update dashboard cards
+    document.getElementById('total-repertoire').textContent = totalCount;
+    document.getElementById('due-today').textContent = dueCount;
+    document.getElementById('in-hands-count').textContent = inHandsCount;
+    document.getElementById('mastered-count').textContent = masteredCount;
+    
+    // Update neglected count if element exists
+    const neglectedElement = document.getElementById('neglected-count');
+    if (neglectedElement) {
+        neglectedElement.textContent = neglectedCount;
+        
+        // Show/hide rediscovery button
+        const rediscoveryButton = document.getElementById('rediscovery-button');
+        if (rediscoveryButton) {
+            if (neglectedCount > 0) {
+                rediscoveryButton.classList.remove('hidden');
+            } else {
+                rediscoveryButton.classList.add('hidden');
+            }
+        }
+    }
+    
+    // Update practice log display
+    const logContainer = document.getElementById('practice-log');
+    if (!logContainer) return;
+    
+    logContainer.innerHTML = '';
+    
+    if (practiceLog.length === 0) {
+        logContainer.innerHTML = '<p>No practice activity recorded yet.</p>';
+    } else {
+        // Group logs by date
+        const groupedLogs = {};
+        
+        practiceLog.forEach(log => {
+            const date = new Date(log.date);
+            const dateStr = date.toLocaleDateString();
+            
+            if (!groupedLogs[dateStr]) {
+                groupedLogs[dateStr] = [];
+            }
+            
+            groupedLogs[dateStr].push({
+                time: date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                message: log.message
+            });
+        });
+        
+        // Display grouped logs
+        Object.keys(groupedLogs).forEach(dateStr => {
+            const dateHeader = document.createElement('h4');
+            dateHeader.textContent = dateStr;
+            logContainer.appendChild(dateHeader);
+            
+            groupedLogs[dateStr].forEach(log => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `<span class="log-time">${log.time}</span>: ${log.message}`;
+                logContainer.appendChild(logEntry);
+            });
+        });
+    }
+    
+    // Update category distribution
+    updateCategoryDistribution();
+    
+    // Add status distribution section
+    const statsContainer = document.getElementById('category-stats');
+    if (statsContainer) {
+        // Add status distribution header
+        const statusHeader = document.createElement('h3');
+        statusHeader.textContent = 'Status Distribution';
+        statsContainer.appendChild(statusHeader);
+        
+        const statusTypes = [
+            { key: 'active', name: 'Active' },
+            { key: 'maintenance', name: 'Maintenance' },
+            { key: 'neglected', name: 'Neglected' },
+            { key: 'archived', name: 'Archived' }
+        ];
+        
+        statusTypes.forEach(status => {
+            if (statusSummary[status.key] > 0) {
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'category-item';
+                
+                const statusDot = document.createElement('span');
+                statusDot.className = `status-indicator status-${status.key}`;
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = `${status.name}: `;
+                
+                const countSpan = document.createElement('span');
+                countSpan.textContent = statusSummary[status.key];
+                countSpan.style.fontWeight = 'bold';
+                
+                statusDiv.appendChild(statusDot);
+                statusDiv.appendChild(nameSpan);
+                statusDiv.appendChild(countSpan);
+                statsContainer.appendChild(statusDiv);
+            }
+        });
+    }
+}
+        
+        // Update category distribution
+        function updateCategoryDistribution() {
+            const statsContainer = document.getElementById('category-stats');
+            statsContainer.innerHTML = '';
+            
+            // Count items per category
+            const categoryCounts = {};
+            categories.forEach(category => {
+                categoryCounts[category] = 0;
+            });
+            
+            repertoire.forEach(item => {
+                if (categoryCounts.hasOwnProperty(item.category)) {
+                    categoryCounts[item.category]++;
+                } else {
+                    categoryCounts[item.category] = 1;
+                }
+            });
+            
+            // Create category bars
+            for (const category in categoryCounts) {
+                if (categoryCounts.hasOwnProperty(category)) {
+                    const count = categoryCounts[category];
+                    if (count === 0) continue;
+                    
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'category-item';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = category;
+                    
+                    const countSpan = document.createElement('span');
+                    countSpan.textContent = count;
+                    
+                    categoryDiv.appendChild(nameSpan);
+                    categoryDiv.appendChild(countSpan);
+                    statsContainer.appendChild(categoryDiv);
+                }
+            }
+            
+            if (statsContainer.children.length === 0) {
+                statsContainer.innerHTML = '<p>No categories with exercises yet.</p>';
+            }
+        }
+        
+        // Check if there are due exercises and alert the user
+        function checkDueExercisesAndNeglectedPieces() {
+    const today = new Date().toISOString().split('T')[0];
+    const dueCount = repertoire.filter(item => 
+        item.nextReview <= today && 
+        item.status !== REPERTOIRE_STATUS.ARCHIVED
+    ).length;
+    
+    // Run maintenance checks
+    const neglectedInfo = runMaintenanceChecks();
+    
+    // Show rediscovery banner if needed
+    if (neglectedInfo.hasNeglectedPieces) {
+        const rediscoveryBanner = document.getElementById('rediscovery-banner');
+        if (rediscoveryBanner) {
+            const message = document.getElementById('rediscovery-message');
+            if (message) {
+                message.textContent = `${neglectedInfo.count} piece${neglectedInfo.count !== 1 ? 's' : ''} in your repertoire haven't been practiced in a while and are at risk of being forgotten.`;
+            }
+        }
+        
+        // Enable rediscovery button on dashboard
+        const rediscoveryButton = document.getElementById('rediscovery-button');
+        if (rediscoveryButton) {
+            rediscoveryButton.classList.remove('hidden');
+        }
+    }
+    
+    // Alert about due exercises
+    if (dueCount > 0) {
+        const message = `You have ${dueCount} exercise${dueCount !== 1 ? 's' : ''} due for practice today!`;
+        alert(message);
+    }
+}
+        
+        // Simplified Metronome functions
+        function setupAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.error("Web Audio API is not supported in this browser");
+                    alert("Metronome is not supported in this browser");
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function toggleMetronome() {
+            if (isMetronomeRunning) {
+                stopMetronome();
+            } else {
+                startMetronome();
+            }
+        }
+        
+        function startMetronome() {
+            if (!setupAudioContext()) return;
+            
+            if (metronomeInterval) {
+                clearInterval(metronomeInterval);
+            }
+            
+            // Calculate the interval based on tempo (BPM)
+            const intervalTime = (60 / tempo) * 1000;
+            
+            // Start metronome
+            metronomeInterval = setInterval(playMetronomeClick, intervalTime);
+            isMetronomeRunning = true;
+            
+            document.getElementById('metronome-toggle').textContent = 'Stop Metronome';
+        }
+        
+        function stopMetronome() {
+            if (metronomeInterval) {
+                clearInterval(metronomeInterval);
+                metronomeInterval = null;
+            }
+            isMetronomeRunning = false;
+            
+            document.getElementById('metronome-toggle').textContent = 'Start Metronome';
+        }
+        
+        function playMetronomeClick() {
+            if (!audioContext) return;
+            
+            // Create oscillator
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            // Set sound properties
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 440; // A4
+            gainNode.gain.value = 0.2;
+            
+            // Connect nodes
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Schedule sound
+            const now = audioContext.currentTime;
+            oscillator.start(now);
+            oscillator.stop(now + 0.05); // 50ms sound duration
+        }
+        
+        function changeTempo(change) {
+            tempo = Math.max(30, Math.min(240, tempo + change));
+            document.getElementById('tempo-value').textContent = tempo;
+            
+            // If metronome is running, restart with new tempo
+            if (isMetronomeRunning) {
+                stopMetronome();
+                startMetronome();
+            }
+        }
+        
+        // Tally counter functions
+        function updateTally(change) {
+            tallyCount = Math.max(0, tallyCount + change);
+            updateTallyDisplay();
+            
+            // If in a practice session, update the tally count for the current exercise
+            if (currentIndex < currentStudySet.length) {
+                const exercise = currentStudySet[currentIndex];
+                const exerciseIndex = repertoire.findIndex(item => item.id === exercise.id);
+                
+                if (exerciseIndex !== -1) {
+                    repertoire[exerciseIndex].tallyCount = tallyCount;
+                    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+                }
+            }
+        }
+        
+        function resetTally() {
+            tallyCount = 0;
+            updateTallyDisplay();
+            
+            // If in a practice session, update the tally count for the current exercise
+            if (currentIndex < currentStudySet.length) {
+                const exercise = currentStudySet[currentIndex];
+                const exerciseIndex = repertoire.findIndex(item => item.id === exercise.id);
+                
+                if (exerciseIndex !== -1) {
+                    repertoire[exerciseIndex].tallyCount = 0;
+                    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+                }
+            }
+        }
+        
+        function updateTallyDisplay() {
+            document.getElementById('tally-display').textContent = tallyCount;
+        }
+        
+        // Weekly planning functions
+        function updateRescheduleExerciseDropdown() {
+            const dropdown = document.getElementById('reschedule-exercise');
+            
+            if (!dropdown) return;
+            
+            // Clear existing options except the first one
+            dropdown.innerHTML = '<option value="">Select an exercise...</option>';
+            
+            // Sort exercises alphabetically
+            const sortedExercises = [...repertoire].sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Add exercise options
+            sortedExercises.forEach(exercise => {
+                const option = document.createElement('option');
+                option.value = exercise.id;
+                option.textContent = exercise.name;
+                dropdown.appendChild(option);
+            });
+            
+            // Add change event handler
+            dropdown.onchange = function() {
+                const id = this.value;
+                if (id) {
+                    showRescheduleInfo(Number(id));
+                } else {
+                    document.getElementById('reschedule-info').classList.add('hidden');
+                }
+            };
+        }
+        
+        function showRescheduleInfo(exerciseId) {
+            const exercise = repertoire.find(item => item.id === exerciseId);
+            
+            if (!exercise) return;
+            
+            document.getElementById('current-review-date').textContent = formatReviewDate(exercise.nextReview);
+            document.getElementById('new-review-date').value = exercise.nextReview;
+            document.getElementById('reschedule-info').classList.remove('hidden');
+        }
+        
+        function rescheduleExercise() {
+            const exerciseId = Number(document.getElementById('reschedule-exercise').value);
+            const newDate = document.getElementById('new-review-date').value;
+            
+            if (!exerciseId || !newDate) {
+                alert('Please select an exercise and enter a new date');
+                return;
+            }
+            
+            const exerciseIndex = repertoire.findIndex(item => item.id === exerciseId);
+            
+            if (exerciseIndex === -1) return;
+            
+            const oldDate = repertoire[exerciseIndex].nextReview;
+            repertoire[exerciseIndex].nextReview = newDate;
+            
+            // Save changes
+            localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+            
+            // Add to practice log
+            addToPracticeLog(`Rescheduled ${repertoire[exerciseIndex].name} from ${oldDate} to ${newDate}`);
+            
+            // Update UI
+            document.getElementById('current-review-date').textContent = formatReviewDate(newDate);
+            alert(`Successfully rescheduled ${repertoire[exerciseIndex].name}`);
+        }
+        
+        // Initialize weekly plan
+        function initWeeklyPlan() {
+            // Create an empty weekly plan if none exists
+            if (!weeklyPlan || Object.keys(weeklyPlan).length === 0) {
+                weeklyPlan = {};
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                days.forEach(day => {
+                    weeklyPlan[day] = {
+                        exercises: [],
+                        totalTime: 30,
+                        notes: ''
+                    };
+                });
+                localStorage.setItem('musicWeeklyPlan', JSON.stringify(weeklyPlan));
+            }
+            
+            displayWeeklyPlan();
+        }
+        
+        // Display practice history
+        function displayPracticeHistory() {
+    // Ensure we're using the latest data from localStorage
+    const practiceHistory = JSON.parse(localStorage.getItem('musicPracticeHistory')) || [];
+    
+    // Debug logging
+    console.log('Practice History Entries:', practiceHistory);
+    
+    // Get containers
+    const summaryContainer = document.getElementById('weekly-practice-summary');
+    const logContainer = document.getElementById('practice-log-by-day');
+    
+    // Ensure containers exist
+    if (!summaryContainer || !logContainer) {
+        console.error('Practice history containers not found');
+        return;
+    }
+    
+    // Clear previous content
+    summaryContainer.innerHTML = '';
+    logContainer.innerHTML = '';
+    
+    // Check if there are any practice history entries
+    if (practiceHistory.length === 0) {
+        summaryContainer.innerHTML = '<p>No practice sessions recorded yet. Complete a practice session to see your history.</p>';
+        logContainer.innerHTML = '<p>Your completed practice sessions will appear here.</p>';
+        return;
+    }
+    
+    // Display weekly practice summary
+    displayWeeklyPracticeSummary(practiceHistory);
+    
+    // Display practice log by day
+    displayPracticeLogByDay(practiceHistory);
+}
+
+        
+        // Display weekly practice summary
+        function displayWeeklyPracticeSummary(practiceHistory) {
+    const summaryContainer = document.getElementById('weekly-practice-summary');
+    if (!summaryContainer) return;
+    
+    summaryContainer.innerHTML = '';
+    
+    if (practiceHistory.length === 0) {
+        summaryContainer.innerHTML = '<p>No practice sessions recorded yet.</p>';
+        return;
+    }
+    
+    // Group sessions by day of week
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const sessionsByDay = {};
+    
+    daysOfWeek.forEach(day => {
+        sessionsByDay[day] = [];
+    });
+    
+    // Get sessions from the last 30 days
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+    
+    const recentSessions = practiceHistory.filter(session => {
+        const sessionDate = new Date(session.date);
+        return sessionDate >= oneMonthAgo;
+    });
+    
+    // Group by day of week
+    recentSessions.forEach(session => {
+        try {
+            const sessionDate = new Date(session.date);
+            const dayOfWeek = daysOfWeek[sessionDate.getDay()];
+            sessionsByDay[dayOfWeek].push(session);
+        } catch (e) {
+            console.error('Error processing session:', session);
+        }
+    });
+    
+    // Create the summary display
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'dashboard-cards';
+    
+    daysOfWeek.forEach(day => {
+        const dayCard = document.createElement('div');
+        dayCard.className = 'dashboard-card';
+        
+        const sessions = sessionsByDay[day];
+        const totalMinutes = sessions.reduce((total, session) => {
+            const duration = session.duration || 0;
+            return total + Math.floor(duration / 60);
+        }, 0);
+        
+        const totalExercises = sessions.reduce((total, session) => {
+            return total + (session.totalExercises || 0);
+        }, 0);
+        
+        const timeValue = document.createElement('div');
+        timeValue.className = 'card-value';
+        timeValue.textContent = totalMinutes + ' min';
+        
+        const dayLabel = document.createElement('div');
+        dayLabel.className = 'card-label';
+        dayLabel.textContent = day;
+        
+        const exercisesSpan = document.createElement('div');
+        exercisesSpan.style.marginTop = '5px';
+        exercisesSpan.textContent = totalExercises + ' exercises';
+        
+        dayCard.appendChild(timeValue);
+        dayCard.appendChild(dayLabel);
+        dayCard.appendChild(exercisesSpan);
+        
+        summaryDiv.appendChild(dayCard);
+    });
+    
+    summaryContainer.appendChild(summaryDiv);
+}
+
+        // Display practice log by day
+       function displayPracticeLogByDay(practiceHistory) {
+    const logContainer = document.getElementById('practice-log-by-day');
+    if (!logContainer) return;
+    
+    logContainer.innerHTML = '';
+    
+    if (practiceHistory.length === 0) {
+        logContainer.innerHTML = '<p>No practice sessions recorded yet.</p>';
+        return;
+    }
+    
+    // Group by date
+    const sessionsByDate = {};
+    
+    practiceHistory.forEach(session => {
+        try {
+            const date = new Date(session.date);
+            if (isNaN(date.getTime())) {
+                console.warn('Invalid date in session:', session);
+                return;
+            }
+            
+            const dateString = date.toDateString();
+            
+            if (!sessionsByDate[dateString]) {
+                sessionsByDate[dateString] = [];
+            }
+            
+            sessionsByDate[dateString].push(session);
+        } catch (e) {
+            console.error('Error processing session:', session);
+        }
+    });
+    
+    // Sort dates in reverse order (newest first)
+    const sortedDates = Object.keys(sessionsByDate).sort((a, b) => {
+        return new Date(b) - new Date(a);
+    });
+    
+    // If no valid dates found, show a message
+    if (sortedDates.length === 0) {
+        logContainer.innerHTML = '<p>No practice sessions with valid dates found.</p>';
+        return;
+    }
+    
+    // Create display
+    sortedDates.forEach(dateString => {
+        const sessions = sessionsByDate[dateString];
+        
+        const dateHeader = document.createElement('h4');
+        dateHeader.textContent = dateString;
+        logContainer.appendChild(dateHeader);
+        
+        sessions.forEach(session => {
+            try {
+                const sessionDiv = document.createElement('div');
+                sessionDiv.className = 'log-entry';
+                
+                const time = new Date(session.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const duration = formatTime(session.duration || 0);
+                
+                const sessionHeader = document.createElement('div');
+                sessionHeader.innerHTML = `<strong>${time}</strong> - Practice Session (${duration})`;
+                sessionDiv.appendChild(sessionHeader);
+                
+                if (session.exercises && session.exercises.length > 0) {
+                    const exerciseList = document.createElement('ul');
+                    exerciseList.style.margin = '5px 0';
+                    exerciseList.style.paddingLeft = '20px';
+                    
+                    session.exercises.forEach(ex => {
+                        if (ex && ex.name) {
+                            const exerciseItem = document.createElement('li');
+                            exerciseItem.textContent = `${ex.name} (${ex.category || 'Uncategorized'})`;
+                            exerciseList.appendChild(exerciseItem);
+                        }
+                    });
+                    
+                    sessionDiv.appendChild(exerciseList);
+                }
+                
+                logContainer.appendChild(sessionDiv);
+            } catch (e) {
+                console.error('Error rendering session:', session);
+            }
+        });
+    });
+    
+    // Add a note at the bottom explaining how to add more entries
+    const note = document.createElement('p');
+    note.style.marginTop = '20px';
+    note.style.fontStyle = 'italic';
+    note.textContent = 'Complete practice sessions in the Study tab to add more entries to your history.';
+    logContainer.appendChild(note);
+}
+
+
+// Data Persistence Functions
+// Add these to the existing script.js section of your app
+
+// Function to export all app data as JSON file
+function exportAppData() {
+    // Collect all app data
+    const appData = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        repertoire: JSON.parse(localStorage.getItem('musicRepertoire')) || [],
+        categories: JSON.parse(localStorage.getItem('musicCategories')) || [],
+        practiceLog: JSON.parse(localStorage.getItem('musicPracticeLog')) || [],
+        practiceHistory: JSON.parse(localStorage.getItem('musicPracticeHistory')) || [],
+        weeklyPlan: JSON.parse(localStorage.getItem('musicWeeklyPlan')) || {}
+    };
+    
+    // Convert to JSON string
+    const jsonData = JSON.stringify(appData, null, 2);
+    
+    // Create a Blob containing the data
+    const blob = new Blob([jsonData], {type: 'application/json'});
+    
+    // Create an object URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    // Create a download link and trigger it
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `music-practice-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    // Add to practice log
+    addToPracticeLog('Exported app data backup');
+}
+
+// Function to import app data from JSON file
+function importAppData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            // Parse the JSON data
+            const importedData = JSON.parse(e.target.result);
+            
+            // Verify the data structure
+            if (!importedData.version || !importedData.repertoire) {
+                alert('Invalid backup file format');
+                return;
+            }
+            
+            // Confirm import
+            if (!confirm(`This will replace your current data with the backup from ${new Date(importedData.exportDate).toLocaleString()}. Continue?`)) {
+                return;
+            }
+            
+            // Import the data into localStorage
+            if (importedData.repertoire) {
+                localStorage.setItem('musicRepertoire', JSON.stringify(importedData.repertoire));
+                repertoire = importedData.repertoire;
+            }
+            
+            if (importedData.categories) {
+                localStorage.setItem('musicCategories', JSON.stringify(importedData.categories));
+                categories = importedData.categories;
+            }
+            
+            if (importedData.practiceLog) {
+                localStorage.setItem('musicPracticeLog', JSON.stringify(importedData.practiceLog));
+                practiceLog = importedData.practiceLog;
+            }
+            
+            if (importedData.practiceHistory) {
+                localStorage.setItem('musicPracticeHistory', JSON.stringify(importedData.practiceHistory));
+            }
+            
+            if (importedData.weeklyPlan) {
+                localStorage.setItem('musicWeeklyPlan', JSON.stringify(importedData.weeklyPlan));
+                weeklyPlan = importedData.weeklyPlan;
+            }
+            
+            // Refresh UI
+            updateCategoryDropdowns();
+            displayRepertoire();
+            displayCategories();
+            updateDashboard();
+            
+            // Add to practice log
+            addToPracticeLog('Imported app data from backup');
+            
+            alert('Data imported successfully!');
+            
+        } catch (error) {
+            console.error('Error importing data:', error);
+            alert('Error importing data: ' + error.message);
+        }
+    };
+    
+    reader.readAsText(file);
+    
+    // Reset the file input so the same file can be selected again if needed
+    event.target.value = '';
+}
+
+// Function to perform a scheduled automatic backup
+function autoBackupData() {
+    // Check if it's time for a backup
+    const lastBackup = localStorage.getItem('lastAutoBackup');
+    const now = new Date();
+    
+    // If no previous backup or last backup was more than 7 days ago
+    if (!lastBackup || (now - new Date(lastBackup) > 7 * 24 * 60 * 60 * 1000)) {
+        // Create backup
+        const appData = {
+            version: '1.0',
+            exportDate: now.toISOString(),
+            repertoire: JSON.parse(localStorage.getItem('musicRepertoire')) || [],
+            categories: JSON.parse(localStorage.getItem('musicCategories')) || [],
+            practiceLog: JSON.parse(localStorage.getItem('musicPracticeLog')) || [],
+            practiceHistory: JSON.parse(localStorage.getItem('musicPracticeHistory')) || [],
+            weeklyPlan: JSON.parse(localStorage.getItem('musicWeeklyPlan')) || {}
+        };
+        
+        // Store in localStorage as a backup
+        try {
+            localStorage.setItem('musicDataBackup', JSON.stringify(appData));
+            localStorage.setItem('lastAutoBackup', now.toISOString());
+            console.log('Auto backup completed', now);
+        } catch (e) {
+            // If localStorage is full, warn the user
+            console.error('Auto backup failed, localStorage may be full', e);
+            alert('Automatic backup failed due to storage limitations. Please export your data manually.');
+        }
+    }
+}
+
+// Function to restore from auto backup
+function restoreFromAutoBackup() {
+    const backup = localStorage.getItem('musicDataBackup');
+    
+    if (!backup) {
+        alert('No automatic backup found');
+        return;
+    }
+    
+    try {
+        const backupData = JSON.parse(backup);
+        const backupDate = new Date(backupData.exportDate).toLocaleString();
+        
+        if (!confirm(`Restore data from automatic backup created on ${backupDate}?`)) {
+            return;
+        }
+        
+        // Restore the data
+        if (backupData.repertoire) {
+            localStorage.setItem('musicRepertoire', JSON.stringify(backupData.repertoire));
+            repertoire = backupData.repertoire;
+        }
+        
+        if (backupData.categories) {
+            localStorage.setItem('musicCategories', JSON.stringify(backupData.categories));
+            categories = backupData.categories;
+        }
+        
+        if (backupData.practiceLog) {
+            localStorage.setItem('musicPracticeLog', JSON.stringify(backupData.practiceLog));
+            practiceLog = backupData.practiceLog;
+        }
+        
+        if (backupData.practiceHistory) {
+            localStorage.setItem('musicPracticeHistory', JSON.stringify(backupData.practiceHistory));
+        }
+        
+        if (backupData.weeklyPlan) {
+            localStorage.setItem('musicWeeklyPlan', JSON.stringify(backupData.weeklyPlan));
+            weeklyPlan = backupData.weeklyPlan;
+        }
+        
+        // Refresh UI
+        updateCategoryDropdowns();
+        displayRepertoire();
+        displayCategories();
+        updateDashboard();
+        
+        // Add to practice log
+        addToPracticeLog('Restored data from automatic backup');
+        
+        alert('Data restored successfully!');
+        
+    } catch (error) {
+        console.error('Error restoring from backup:', error);
+        alert('Error restoring data: ' + error.message);
+    }
+}
+
+// Function to check localStorage usage
+function checkStorageUsage() {
+    let totalSize = 0;
+    
+    // Calculate total size of all items in localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        totalSize += (key.length + value.length) * 2; // Approximate size in bytes (UTF-16 encoding)
+    }
+    
+    // Convert to KB or MB for display
+    let sizeDisplay;
+    if (totalSize > 1024 * 1024) {
+        sizeDisplay = (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
+    } else {
+        sizeDisplay = (totalSize / 1024).toFixed(2) + ' KB';
+    }
+    
+    // Estimate percentage of storage used (most browsers have 5-10MB limit)
+    const estimatedLimit = 5 * 1024 * 1024; // 5MB conservative estimate
+    const percentUsed = (totalSize / estimatedLimit * 100).toFixed(1);
+    
+    return {
+        size: sizeDisplay,
+        percentUsed: percentUsed + '%',
+        isNearLimit: parseFloat(percentUsed) > 80, // Warning if over 80% used
+        rawBytes: totalSize
+    };
+}
+
+// Define new status types for repertoire items
+const REPERTOIRE_STATUS = {
+    ACTIVE: 'active',           // Regular practice rotation
+    MAINTENANCE: 'maintenance', // Longer intervals but never forgotten
+    ARCHIVED: 'archived',       // Deliberately set aside
+    NEGLECTED: 'neglected'      // Automatically flagged as at risk of being forgotten
+};
+
+// Function to initialize status for all pieces
+function initializeRepertoireStatus() {
+    let modified = false;
+    
+    repertoire.forEach((item, index) => {
+        if (!item.status) {
+            repertoire[index].status = REPERTOIRE_STATUS.ACTIVE;
+            modified = true;
+        }
+        
+        // Also make sure lastPracticed exists
+        if (!item.lastPracticed) {
+            repertoire[index].lastPracticed = item.dateAdded || new Date().toISOString();
+            modified = true;
+        }
+    });
+    
+    if (modified) {
+        localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+    }
+}
+
+// Function to change a piece's status
+function changeRepertoireStatus(id, newStatus) {
+    const index = repertoire.findIndex(item => item.id === id);
+    if (index === -1) return;
+    
+    const oldStatus = repertoire[index].status;
+    repertoire[index].status = newStatus;
+    
+    // If moving to maintenance mode, mark the "never forget" flag
+    if (newStatus === REPERTOIRE_STATUS.MAINTENANCE) {
+        repertoire[index].neverForget = true;
+    }
+    
+    // If archiving, store the archive date
+    if (newStatus === REPERTOIRE_STATUS.ARCHIVED) {
+        repertoire[index].archivedDate = new Date().toISOString();
+    }
+    
+    // Save changes
+    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+    
+    // Update UI
+    displayRepertoire();
+    
+    // Add to practice log
+    addToPracticeLog(`Changed "${repertoire[index].name}" status from ${oldStatus} to ${newStatus}`);
+    
+    // Close the modal
+    closeExerciseModal();
+}
+
+// Function to check for neglected pieces
+function identifyNeglectedPieces() {
+    const today = new Date();
+    const neglectThresholdDays = 60; // Mark as neglected if not practiced in 60 days
+    
+    repertoire.forEach((item, index) => {
+        // Skip archived pieces
+        if (item.status === REPERTOIRE_STATUS.ARCHIVED) return;
+        
+        // Calculate days since last practice
+        const lastPractice = new Date(item.lastPracticed);
+        const daysSinceLastPractice = Math.floor((today - lastPractice) / (1000 * 60 * 60 * 24));
+        
+        // Update neglected status
+        if (daysSinceLastPractice > neglectThresholdDays && 
+            item.status !== REPERTOIRE_STATUS.NEGLECTED) {
+            
+            repertoire[index].status = REPERTOIRE_STATUS.NEGLECTED;
+            repertoire[index].neglectedDate = today.toISOString();
+            
+            // Add to practice log
+            addToPracticeLog(`"${item.name}" marked as neglected (not practiced in ${daysSinceLastPractice} days)`);
+        }
+    });
+    
+    // Save changes
+    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+}
+
+// Function to create a rediscovery session
+function createRediscoverySession() {
+
+identifyNeglectedPieces();
+    // Get neglected and maintenance pieces
+    const neglectedPieces = repertoire.filter(item => 
+        item.status === REPERTOIRE_STATUS.NEGLECTED);
+    
+    const maintenanceDue = repertoire.filter(item => {
+        if (item.status !== REPERTOIRE_STATUS.MAINTENANCE) return false;
+        
+        const lastPractice = new Date(item.lastPracticed);
+        const today = new Date();
+        const daysSinceLastPractice = Math.floor((today - lastPractice) / (1000 * 60 * 60 * 24));
+        
+        // Due for maintenance if not practiced in 30+ days
+        return daysSinceLastPractice > 30;
+    });
+    
+    // Combine and select up to 5 pieces
+    let rediscoverySet = [...neglectedPieces, ...maintenanceDue]
+        .sort((a, b) => new Date(a.lastPracticed) - new Date(b.lastPracticed))
+        .slice(0, 5);
+    
+    // If we have a set, start a practice session with these pieces
+    if (rediscoverySet.length > 0) {
+        currentStudySet = rediscoverySet;
+        currentIndex = 0;
+        
+        // Switch to study tab and show the exercise
+        switchTab('study');
+        showCurrentExercise();
+        document.getElementById('study-container').classList.remove('hidden');
+        document.getElementById('session-complete').classList.add('hidden');
+        
+        // Add to practice log
+        addToPracticeLog(`Started rediscovery session with ${rediscoverySet.length} pieces`);
+        
+        // Reset timer
+        resetTimer();
+        startTimer();
+        
+        // Hide the rediscovery banner
+        document.getElementById('rediscovery-banner').classList.add('hidden');
+        
+        return true;
+    }
+    
+    alert('No neglected or maintenance pieces need review at this time.');
+    return false;
+}
+
+// Function to run maintenance checks
+function runMaintenanceChecks() {
+    // First identify any neglected pieces
+    identifyNeglectedPieces();
+    
+    // Check if we should suggest a rediscovery session
+    const neglectedCount = repertoire.filter(item => 
+        item.status === REPERTOIRE_STATUS.NEGLECTED).length;
+    
+    if (neglectedCount > 0) {
+        return {
+            hasNeglectedPieces: true,
+            count: neglectedCount
+        };
+    }
+    
+    return {
+        hasNeglectedPieces: false,
+        count: 0
+    };
+}
+
+// Function to get a summary of repertoire status
+function getRepertoireStatusSummary() {
+    const summary = {
+        active: 0,
+        maintenance: 0,
+        archived: 0,
+        neglected: 0,
+        total: repertoire.length
+    };
+    
+    repertoire.forEach(item => {
+        if (item.status === REPERTOIRE_STATUS.ACTIVE) summary.active++;
+        else if (item.status === REPERTOIRE_STATUS.MAINTENANCE) summary.maintenance++;
+        else if (item.status === REPERTOIRE_STATUS.ARCHIVED) summary.archived++;
+        else if (item.status === REPERTOIRE_STATUS.NEGLECTED) summary.neglected++;
+    });
+    
+    return summary;
+}
+
+
+function assessPerformance() {
+    if (currentIndex >= currentStudySet.length) return;
+    
+    // Check if difficulty was selected
+    if (selectedDifficulty === 0) {
+        alert('Please select a difficulty rating before continuing.');
+        return;
+    }
+    
+    const exercise = currentStudySet[currentIndex];
+    const exerciseIndex = repertoire.findIndex(item => item.id === exercise.id);
+    const practiceNotes = document.getElementById('practice-notes').value.trim();
+    
+    // Store the current tally count with the exercise
+    repertoire[exerciseIndex].tallyCount = tallyCount;
+    
+    // Get current date for logging
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    // Record performance in history
+    if (!repertoire[exerciseIndex].performanceHistory) {
+        repertoire[exerciseIndex].performanceHistory = [];
+    }
+    
+    repertoire[exerciseIndex].performanceHistory.push({
+        date: now.toISOString(),
+        difficulty: selectedDifficulty,
+        notes: practiceNotes,
+        repetitions: tallyCount // Store repetitions count in history
+    });
+    
+    // Record last practiced date
+    repertoire[exerciseIndex].lastPracticed = now.toISOString();
+    
+    // Calculate new interval based on performance and status
+    repertoire[exerciseIndex].interval = calculateNextIntervalWithMaintenance(
+        exerciseIndex, 
+        selectedDifficulty
+    );
+    
+    // If this was a neglected piece, change status back to active or maintenance
+    if (repertoire[exerciseIndex].status === REPERTOIRE_STATUS.NEGLECTED) {
+        if (repertoire[exerciseIndex].neverForget) {
+            repertoire[exerciseIndex].status = REPERTOIRE_STATUS.MAINTENANCE;
+        } else {
+            repertoire[exerciseIndex].status = REPERTOIRE_STATUS.ACTIVE;
+        }
+        
+        // Add to practice log
+        addToPracticeLog(`Recovered "${repertoire[exerciseIndex].name}" from neglected status`);
+    }
+    
+    // Update mastery level based on performance
+    updateMasteryLevel(exerciseIndex, selectedDifficulty);
+    
+    // Set next review date
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + repertoire[exerciseIndex].interval);
+    repertoire[exerciseIndex].nextReview = nextDate.toISOString().split('T')[0];
+    repertoire[exerciseIndex].reviewCount++;
+    
+    // Add to practice log
+    const difficultyText = getDifficultyLabel(selectedDifficulty);
+    const repetitionText = tallyCount > 0 ? ` - ${tallyCount} repetitions` : '';
+    addToPracticeLog(`Practiced ${exercise.name} - Rated as ${difficultyText}${repetitionText}`);
+    
+    // Save data
+    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+    
+    // Move to next exercise or complete session
+    currentIndex++;
+    if (currentIndex < currentStudySet.length) {
+        showCurrentExercise();
+    } else {
+        completeSession();
+    }
+}
+
+function closeExerciseModal() {
+    document.getElementById('exerciseModal').style.display = 'none';
+    currentExerciseId = null;
+} // Make sure this closing bracket is here
+
+function updateMasteryLevel(exerciseIndex, difficultyRating) {
+            if (exerciseIndex < 0 || exerciseIndex >= repertoire.length) return;
+            
+            const exercise = repertoire[exerciseIndex];
+            let currentMastery = exercise.masteryLevel || 1;
+            
+            // Calculate mastery adjustment
+            let masteryChange = 0;
+            
+            if (difficultyRating >= 5) { // Mastered
+                masteryChange = +0.5;
+            } else if (difficultyRating === 4) { // Easy
+                masteryChange = +0.3;
+            } else if (difficultyRating === 3) { // Moderate
+                masteryChange = +0.1;
+            } else if (difficultyRating === 2) { // Difficult
+                masteryChange = -0.1;
+            } else { // Struggling
+                masteryChange = -0.3;
+            }
+            
+            // Apply the change
+            let newMastery = currentMastery + masteryChange;
+            
+            // Ensure mastery is between 1 and 5
+            newMastery = Math.max(1, Math.min(5, newMastery));
+            
+            // Round to whole number for storage
+            repertoire[exerciseIndex].masteryLevel = Math.round(newMastery);
+        }
+
+// Function to calculate next interval with maintenance consideration
+function calculateNextIntervalWithMaintenance(exerciseIndex, difficultyRating) {
+    if (exerciseIndex < 0 || exerciseIndex >= repertoire.length) return 1;
+    
+    const exercise = repertoire[exerciseIndex];
+    let currentInterval = exercise.interval || 1;
+    let newInterval;
+    
+    // Different calculation for maintenance mode pieces
+    if (exercise.status === REPERTOIRE_STATUS.MAINTENANCE) {
+        // For maintenance pieces, we still increase interval but more slowly
+        // and with a higher cap to ensure periodic review
+        
+        // Base interval calculation
+        let intervalAdjustment;
+        
+        switch (difficultyRating) {
+            case 5: // Mastered
+                intervalAdjustment = 1.5; // Slower growth than active pieces
+                break;
+            case 4: // Easy
+                intervalAdjustment = 1.3;
+                break;
+            case 3: // Moderate
+                intervalAdjustment = 1.1;
+                break;
+            case 2: // Difficult
+                intervalAdjustment = 0.9;
+                break;
+            case 1: // Struggling
+            default:
+                intervalAdjustment = 0.7;
+                break;
+        }
+        
+        newInterval = Math.round(currentInterval * intervalAdjustment);
+        
+        // For maintenance pieces, we still want a maximum interval
+        // but it should be higher than regular pieces to allow spacing
+        // This ensures the piece is never truly forgotten
+        const maxMaintenanceInterval = 90; // 90 days max for maintenance pieces
+        newInterval = Math.min(maxMaintenanceInterval, newInterval);
+        
+    } else {
+        // For active pieces, use the standard algorithm
+        let intervalAdjustment;
+        
+        switch (difficultyRating) {
+            case 5: // Mastered
+                intervalAdjustment = 2.5;
+                break;
+            case 4: // Easy
+                intervalAdjustment = 2.0;
+                break;
+            case 3: // Moderate
+                intervalAdjustment = 1.5;
+                break;
+            case 2: // Difficult
+                intervalAdjustment = 0.9;
+                break;
+            case 1: // Struggling
+            default:
+                intervalAdjustment = 0.5;
+                break;
+        }
+        
+        newInterval = Math.round(currentInterval * intervalAdjustment);
+        
+        // Apply maximum/minimum interval constraints
+        if (difficultyRating <= 2) {
+            // For difficult or struggling, cap at 7 days
+            newInterval = Math.min(7, newInterval);
+        } else if (difficultyRating === 3) {
+            // For moderate, cap at 14 days
+            newInterval = Math.min(14, newInterval);
+        } else {
+            // For easy or mastered, cap at 30 days
+            newInterval = Math.min(30, newInterval);
+        }
+    }
+    
+    // Always ensure minimum interval of 1 day
+    newInterval = Math.max(1, newInterval);
+    
+    return newInterval;
+
+}
+
+function skipExercise() {
+    if (currentIndex >= currentStudySet.length) return;
+    
+    const exercise = currentStudySet[currentIndex];
+    
+    // Add to skipped exercises list
+    skippedExercises.push({
+        id: exercise.id,
+        name: exercise.name,
+        category: exercise.category
+    });
+    
+    // Log the skip
+    addToPracticeLog(`Skipped: ${exercise.name}`);
+    
+    // Move to next exercise without updating interval or recording performance
+    currentIndex++;
+    
+    if (currentIndex < currentStudySet.length) {
+        // Reset difficulty selection
+        selectedDifficulty = 0;
+        document.querySelectorAll('.difficulty-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        // Reset practice notes
+        document.getElementById('practice-notes').value = '';
+        
+        // Show the next exercise
+        showCurrentExercise();
+    } else {
+        completeSession();
+    }
+}
+
+function updateSkippedExercisesDisplay(skippedCount) {
+    // Find the session-stats div
+    const statsDiv = document.getElementById('session-stats');
+    
+    // Remove existing skipped card if present
+    const existingSkippedCard = document.getElementById('skipped-card');
+    if (existingSkippedCard) {
+        existingSkippedCard.remove();
+    }
+    
+    // Add skipped card if any exercises were skipped
+    if (skippedCount > 0) {
+        const skippedCard = document.createElement('div');
+        skippedCard.className = 'stat-card';
+        skippedCard.id = 'skipped-card';
+        
+        const skippedValue = document.createElement('div');
+        skippedValue.className = 'stat-value';
+        skippedValue.textContent = skippedCount;
+        
+        const skippedLabel = document.createElement('div');
+        skippedLabel.textContent = 'Skipped';
+        
+        skippedCard.appendChild(skippedValue);
+        skippedCard.appendChild(skippedLabel);
+        
+        statsDiv.appendChild(skippedCard);
+        
+        // Add skipped pieces list if there are any
+        if (skippedExercises.length > 0) {
+            const sessionCompleteDiv = document.getElementById('session-complete');
+            
+            // Remove existing skipped list if present
+            const existingList = document.getElementById('skipped-list-container');
+            if (existingList) {
+                existingList.remove();
+            }
+            
+            // Create container for skipped list
+            const skippedListContainer = document.createElement('div');
+            skippedListContainer.id = 'skipped-list-container';
+            skippedListContainer.style.marginTop = '20px';
+            
+            const skippedHeading = document.createElement('h4');
+            skippedHeading.textContent = 'Skipped Exercises:';
+            skippedListContainer.appendChild(skippedHeading);
+            
+            const skippedList = document.createElement('ul');
+            skippedList.style.listStyleType = 'none';
+            skippedList.style.padding = '0';
+            
+            skippedExercises.forEach(exercise => {
+                const listItem = document.createElement('li');
+                listItem.style.padding = '5px 0';
+                listItem.textContent = `${exercise.name} (${exercise.category})`;
+                skippedList.appendChild(listItem);
+            });
+            
+            skippedListContainer.appendChild(skippedList);
+            sessionCompleteDiv.insertBefore(skippedListContainer, sessionCompleteDiv.lastElementChild);
+        }
+    }
+}
+
+    </script>
+</body>
+</html>
