@@ -2381,20 +2381,28 @@ function startStudySession() {
     // Run maintenance checks
     const neglectedInfo = runMaintenanceChecks();
     
-    // Show rediscovery banner if needed
-    if (neglectedInfo.hasNeglectedPieces) {
-        const rediscoveryBanner = document.getElementById('rediscovery-banner');
-        if (rediscoveryBanner) {
+    // Show rediscovery banner ONLY if there are neglected pieces
+    const rediscoveryBanner = document.getElementById('rediscovery-banner');
+    if (rediscoveryBanner) {
+        if (neglectedInfo.hasNeglectedPieces) {
             const message = document.getElementById('rediscovery-message');
             if (message) {
                 message.textContent = `${neglectedInfo.count} piece${neglectedInfo.count !== 1 ? 's' : ''} in your repertoire haven't been practiced in a while and are at risk of being forgotten.`;
             }
+            rediscoveryBanner.classList.remove('hidden');
+        } else {
+            // Make sure banner is hidden if no neglected pieces
+            rediscoveryBanner.classList.add('hidden');
         }
-        
-        // Enable rediscovery button on dashboard
-        const rediscoveryButton = document.getElementById('rediscovery-button');
-        if (rediscoveryButton) {
+    }
+    
+    // Enable/disable rediscovery button on dashboard based on neglected pieces
+    const rediscoveryButton = document.getElementById('rediscovery-button');
+    if (rediscoveryButton) {
+        if (neglectedInfo.hasNeglectedPieces) {
             rediscoveryButton.classList.remove('hidden');
+        } else {
+            rediscoveryButton.classList.add('hidden');
         }
     }
     
