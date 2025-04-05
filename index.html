@@ -2454,27 +2454,44 @@ function startStudySession() {
             document.getElementById('metronome-toggle').textContent = 'Start Metronome';
         }
         
-        function playMetronomeClick() {
-            if (!audioContext) return;
-            
-            // Create oscillator
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            // Set sound properties
-            oscillator.type = 'sine';
-            oscillator.frequency.value = 440; // A4
-            gainNode.gain.value = 0.2;
-            
-            // Connect nodes
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            // Schedule sound
-            const now = audioContext.currentTime;
-            oscillator.start(now);
-            oscillator.stop(now + 0.05); // 50ms sound duration
-        }
+       function playMetronomeClick() {
+    if (!audioContext) return;
+    
+    // Create oscillator and gain nodes
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    // Create a filter for more wooden sound
+    const filter = audioContext.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 2000; // Emphasize mid frequencies
+    filter.Q.value = 1;
+    
+    // Create another filter for more wooden character
+    const highpassFilter = audioContext.createBiquadFilter();
+    highpassFilter.type = "highpass";
+    highpassFilter.frequency.value = 500;
+    
+    // Set sound properties
+    oscillator.type = 'triangle'; // Triangle wave sounds more woody than sine
+    oscillator.frequency.value = 800; // Lower frequency for wooden sound
+    
+    // Set up envelope for more percussive attack
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.3, now + 0.005); // Fast attack
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15); // Quick decay
+    
+    // Connect nodes: oscillator -> filter -> highpass -> gain -> destination
+    oscillator.connect(filter);
+    filter.connect(highpassFilter);
+    highpassFilter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Schedule sound
+    oscillator.start(now);
+    oscillator.stop(now + 0.15); // Slightly longer sound duration
+}
         
         function changeTempo(change) {
             tempo = Math.max(30, Math.min(240, tempo + change));
