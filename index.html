@@ -450,6 +450,70 @@
     display: flex;
     gap: 10px;
 }
+
+/* Weekly calendar styling */
+.calendar-day {
+    text-align: center;
+}
+
+.day-date {
+    font-size: 0.8em;
+    color: #757575;
+    margin-top: 2px;
+}
+
+.exercise-list {
+    margin-top: 10px;
+    text-align: left;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.calendar-exercise {
+    background-color: #f5f5f5;
+    border-left: 3px solid #1a73e8;
+    padding: 5px 8px;
+    margin: 3px 0;
+    font-size: 0.85em;
+    border-radius: 0 3px 3px 0;
+    display: flex;
+    align-items: center;
+}
+
+.calendar-exercise.due-today {
+    border-left-color: #ff9800;
+    background-color: #fff8e1;
+}
+
+.calendar-exercise.overdue {
+    border-left-color: #e53935;
+    background-color: #ffebee;
+}
+
+.exercise-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    display: inline-block;
+}
+
+.today-indicator {
+    background-color: #4caf50;
+    color: white;
+    border-radius: 3px;
+    padding: 3px 6px;
+    margin-top: 5px;
+    font-size: 0.7em;
+    display: inline-block;
+}
+
+.no-exercises {
+    font-style: italic;
+    color: #9e9e9e;
+    font-size: 0.9em;
+    padding: 10px 0;
+}
     </style>
 </head>
 <body>
@@ -477,6 +541,15 @@
             <button onclick="createRediscoverySession()">Start Rediscovery Session</button>
             <button onclick="this.closest('#rediscovery-banner').classList.add('hidden')" class="secondary">Not Now</button>
         </div>
+    </div>
+
+
+    <!-- Weekly Practice Calendar -->
+    <div class="section" id="weekly-calendar-section">
+    <h2>Upcoming Practice Schedule</h2>
+    <div class="dashboard-cards" id="weekly-calendar-display">
+        <!-- Weekly calendar cards will be inserted here -->
+    </div>
     </div>
     
     <h2>Practice Session</h2>
@@ -898,6 +971,9 @@ window.onload = function () {
 
   // Check if it's time for an auto-backup
   autoBackupData();
+
+// Display weekly calendar
+  displayWeeklyCalendar();
 
   // Set up the practice history initially if we're on that tab
   if (
@@ -2049,6 +2125,7 @@ function startStudySession() {
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
+displayWeeklyCalendar();
     }
     
     // Stop metronome
@@ -2411,6 +2488,8 @@ function startStudySession() {
         const message = `You have ${dueCount} exercise${dueCount !== 1 ? 's' : ''} due for practice today!`;
         alert(message);
     }
+
+  displayWeeklyCalendar();
 }
         
         // Simplified Metronome functions
@@ -3338,6 +3417,8 @@ function assessPerformance() {
     
     // Save data
     localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+
+displayWeeklyCalendar();
     
     // Move to next exercise or complete session
     currentIndex++;
@@ -3569,6 +3650,144 @@ function updateSkippedExercisesDisplay(skippedCount) {
             sessionCompleteDiv.insertBefore(skippedListContainer, sessionCompleteDiv.lastElementChild);
         }
     }
+}
+
+// Weekly calendar functions
+// Weekly calendar functions
+function displayWeeklyCalendar() {
+    const calendarContainer = document.getElementById('weekly-calendar-display');
+    if (!calendarContainer) return;
+    
+    calendarContainer.innerHTML = '';
+    
+    // Get current date info
+    const today = new Date();
+    
+    // Format today's date for comparison
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Create array for today and the next 6 days
+    const weekDays = [];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Start with today and show 7 days total
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i); // Today + i days
+        
+        weekDays.push({
+            name: dayNames[date.getDay()], // Get day name based on date's day of week
+            date: date,
+            dateStr: date.toISOString().split('T')[0],
+            isToday: i === 0 // First day is always today
+        });
+    }
+    
+    // Create a card for each day
+    weekDays.forEach(day => {
+        const dayCard = document.createElement('div');
+        dayCard.className = 'dashboard-card';
+        
+        const cardContent = document.createElement('div');
+        cardContent.className = 'calendar-day';
+        
+        // Day name (with "Today" indicator if applicable)
+        const dayName = document.createElement('div');
+        dayName.className = 'day-name';
+        dayName.textContent = day.name;
+        
+        // Format date as "Apr 7" style
+        const formattedDate = day.date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
+        
+        const dateDisplay = document.createElement('div');
+        dateDisplay.className = 'day-date';
+        dateDisplay.textContent = formattedDate;
+        
+        cardContent.appendChild(dayName);
+        cardContent.appendChild(dateDisplay);
+        
+        // Add "Today" indicator if this is today
+        if (day.isToday) {
+            const todayIndicator = document.createElement('div');
+            todayIndicator.className = 'today-indicator';
+            todayIndicator.textContent = 'TODAY';
+            cardContent.appendChild(todayIndicator);
+        }
+        
+        // Find exercises scheduled for this day
+        const dueExercises = repertoire.filter(item => {
+            // Skip archived items
+            if (item.status === REPERTOIRE_STATUS.ARCHIVED) return false;
+            
+            // Check if nextReview matches this day
+            return item.nextReview === day.dateStr;
+        });
+        
+        // Create exercise list
+        const exerciseList = document.createElement('div');
+        exerciseList.className = 'exercise-list';
+        
+        if (dueExercises.length === 0) {
+            const noExercises = document.createElement('div');
+            noExercises.className = 'no-exercises';
+            noExercises.textContent = 'No exercises due';
+            exerciseList.appendChild(noExercises);
+        } else {
+            // Sort exercises (in hands first, then by name)
+            dueExercises.sort((a, b) => {
+                if (a.inHands && !b.inHands) return -1;
+                if (!a.inHands && b.inHands) return 1;
+                return a.name.localeCompare(b.name);
+            });
+            
+            dueExercises.forEach(exercise => {
+                const exerciseItem = document.createElement('div');
+                exerciseItem.className = 'calendar-exercise';
+                
+                // Status indicator
+                const statusDot = document.createElement('span');
+                statusDot.className = 'exercise-indicator';
+                
+                // Color based on status
+                if (exercise.inHands) {
+                    statusDot.style.backgroundColor = '#e53935'; // Red for in hands
+                    exerciseItem.title = 'In Hands';
+                } else if (day.dateStr < todayStr) {
+                    statusDot.style.backgroundColor = '#ff9800'; // Orange for overdue
+                    exerciseItem.className += ' overdue';
+                    exerciseItem.title = 'Overdue';
+                } else if (day.dateStr === todayStr) {
+                    statusDot.style.backgroundColor = '#4caf50'; // Green for today
+                    exerciseItem.className += ' due-today';
+                    exerciseItem.title = 'Due Today';
+                } else {
+                    statusDot.style.backgroundColor = '#2196f3'; // Blue for future
+                }
+                
+                // Exercise name
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = exercise.name;
+                
+                exerciseItem.appendChild(statusDot);
+                exerciseItem.appendChild(nameSpan);
+                
+                // Make clickable to show exercise details
+                exerciseItem.style.cursor = 'pointer';
+                exerciseItem.onclick = function() {
+                    showExerciseDetails(exercise.id);
+                };
+                
+                exerciseList.appendChild(exerciseItem);
+            });
+        }
+        
+        cardContent.appendChild(exerciseList);
+        dayCard.appendChild(cardContent);
+        calendarContainer.appendChild(dayCard);
+    });
 }
 
     </script>
