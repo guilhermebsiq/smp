@@ -1572,46 +1572,36 @@ function switchTab(tabId) {
         nextReviewSpan.style.fontSize = '0.8em';
         
         // Format the status message based on status
-           let statusMessage = '';
-    if (item.status === REPERTOIRE_STATUS.ARCHIVED) {
-        statusMessage = 'Archived';
-        nextReviewSpan.style.color = '#9e9e9e';
-    } else if (item.status === REPERTOIRE_STATUS.NEGLECTED) {
-        // Create dates at midnight for consistent comparison
-        const lastPracticedDate = new Date(item.neglectedDate || item.lastPracticed);
-        lastPracticedDate.setHours(0, 0, 0, 0);
-        
-        const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0);
-        
-        const daysNeglected = Math.round((todayDate - lastPracticedDate) / (1000 * 60 * 60 * 24));
-        statusMessage = `Neglected for ${daysNeglected} day${daysNeglected !== 1 ? 's' : ''}`;
-        nextReviewSpan.style.color = '#ff9800';
-    } else if (item.nextReview < today) {
-        // Create dates at midnight for consistent comparison
-        const reviewDate = new Date(item.nextReview);
-        reviewDate.setHours(0, 0, 0, 0);
-        
-        const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0);
-        
-        const daysOverdue = Math.round((todayDate - reviewDate) / (1000 * 60 * 60 * 24));
-        statusMessage = `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
-        nextReviewSpan.style.color = '#e53935';
-    } else if (item.nextReview === today) {
-        statusMessage = 'Due today';
-        nextReviewSpan.style.color = '#ff9800';
-    } else {
-        // Create dates at midnight for consistent comparison
-        const reviewDate = new Date(item.nextReview);
-        reviewDate.setHours(0, 0, 0, 0);
-        
-        const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0);
-        
-        const daysUntil = Math.round((reviewDate - todayDate) / (1000 * 60 * 60 * 24));
-        statusMessage = `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
-    }
+           // Update the section in displayRepertoire function that handles date status messages
+// Format the status message based on status
+let statusMessage = '';
+if (item.status === REPERTOIRE_STATUS.ARCHIVED) {
+    statusMessage = 'Archived';
+    nextReviewSpan.style.color = '#9e9e9e';
+} else if (item.status === REPERTOIRE_STATUS.NEGLECTED) {
+    const lastPracticedDate = normalizeDate(item.neglectedDate || item.lastPracticed);
+    const todayDate = normalizeDate(new Date());
+    
+    const daysNeglected = getDaysDifference(lastPracticedDate, todayDate);
+    statusMessage = `Neglected for ${daysNeglected} day${daysNeglected !== 1 ? 's' : ''}`;
+    nextReviewSpan.style.color = '#ff9800';
+} else if (normalizeDate(item.nextReview) < normalizeDate(new Date())) {
+    const reviewDate = normalizeDate(item.nextReview);
+    const todayDate = normalizeDate(new Date());
+    
+    const daysOverdue = getDaysDifference(reviewDate, todayDate);
+    statusMessage = `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
+    nextReviewSpan.style.color = '#e53935';
+} else if (isSameDay(item.nextReview, new Date())) {
+    statusMessage = 'Due today';
+    nextReviewSpan.style.color = '#ff9800';
+} else {
+    const reviewDate = normalizeDate(item.nextReview);
+    const todayDate = normalizeDate(new Date());
+    
+    const daysUntil = getDaysDifference(todayDate, reviewDate);
+    statusMessage = `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+}
         
         nextReviewSpan.textContent = statusMessage;
         details.appendChild(nextReviewSpan);
@@ -1776,19 +1766,25 @@ function switchTab(tabId) {
         }
         
         // Format review date
-        function formatReviewDate(dateStr) {
-            const today = new Date().toISOString().split('T')[0];
-            
-            if (dateStr < today) {
-                const daysOverdue = Math.floor((new Date() - new Date(dateStr)) / (1000 * 60 * 60 * 24));
-                return `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
-            } else if (dateStr === today) {
-                return 'Due today';
-            } else {
-                const daysUntil = Math.floor((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24));
-                return `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
-            }
-        }
+       function formatReviewDate(dateStr) {
+    const today = new Date();
+    
+    if (!dateStr) return 'No date set';
+    
+    // Convert both to dates and compare
+    const reviewDate = normalizeDate(dateStr);
+    const todayDate = normalizeDate(today);
+    
+    if (reviewDate < todayDate) {
+        const daysOverdue = getDaysDifference(reviewDate, todayDate);
+        return `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`;
+    } else if (isSameDay(reviewDate, todayDate)) {
+        return 'Due today';
+    } else {
+        const daysUntil = getDaysDifference(todayDate, reviewDate);
+        return `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+    }
+}
         
         // Get display for mastery level
         function getMasteryDisplayHTML(level) {
