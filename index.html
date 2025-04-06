@@ -1090,7 +1090,25 @@ function updateStorageUsageDisplay() {
         storageInfo.appendChild(warning);
     }
 }
+// Date utility functions
+function normalizeDate(date) {
+    // Convert string dates to Date objects and set to midnight
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+}
 
+function isSameDay(date1, date2) {
+    const d1 = normalizeDate(date1);
+    const d2 = normalizeDate(date2);
+    return d1.getTime() === d2.getTime();
+}
+
+function getDaysDifference(date1, date2) {
+    const d1 = normalizeDate(date1);
+    const d2 = normalizeDate(date2);
+    return Math.round((d2 - d1) / (86400000)); // 86400000 = 1 day in milliseconds
+}
 // Update the switchTab function to include data management
 // Replace the existing switchTab function with this one
 function switchTab(tabId) {
@@ -3723,9 +3741,7 @@ function displayWeeklyCalendar() {
     
     // Get current date info
     const today = new Date();
-    
-    // Format today's date for comparison
-    const todayStr = today.toISOString().split('T')[0];
+    today.setHours(0, 0, 0, 0); // Normalize to midnight
     
     // Create array for today and the next 6 days
     const weekDays = [];
@@ -3783,8 +3799,8 @@ function displayWeeklyCalendar() {
             // Skip archived items
             if (item.status === REPERTOIRE_STATUS.ARCHIVED) return false;
             
-            // Check if nextReview matches this day
-            return item.nextReview === day.dateStr;
+            // Check if nextReview matches this day using consistent date comparison
+            return isSameDay(item.nextReview, day.date);
         });
         
         // Create exercise list
@@ -3812,15 +3828,19 @@ function displayWeeklyCalendar() {
                 const statusDot = document.createElement('span');
                 statusDot.className = 'exercise-indicator';
                 
+                // Convert dates for proper comparison
+                const reviewDate = normalizeDate(exercise.nextReview);
+                const todayDate = normalizeDate(new Date());
+                
                 // Color based on status
                 if (exercise.inHands) {
                     statusDot.style.backgroundColor = '#e53935'; // Red for in hands
                     exerciseItem.title = 'In Hands';
-                } else if (day.dateStr < todayStr) {
+                } else if (reviewDate < todayDate) {
                     statusDot.style.backgroundColor = '#ff9800'; // Orange for overdue
                     exerciseItem.className += ' overdue';
                     exerciseItem.title = 'Overdue';
-                } else if (day.dateStr === todayStr) {
+                } else if (isSameDay(reviewDate, todayDate)) {
                     statusDot.style.backgroundColor = '#4caf50'; // Green for today
                     exerciseItem.className += ' due-today';
                     exerciseItem.title = 'Due Today';
