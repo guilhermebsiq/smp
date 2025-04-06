@@ -554,6 +554,16 @@
     margin-top: 8px;
     font-size: 0.9em;
 }
+        .calendar-exercise.overdue::after {
+    content: "OVERDUE";
+    font-size: 0.7em;
+    background-color: #ff9800;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-left: 5px;
+    display: inline-block;
+}
     </style>
 </head>
 <body>
@@ -2559,11 +2569,12 @@ displayWeeklyCalendar();
     }
     
     // Alert about due exercises
-    if (dueCount > 0) {
+    /*
+            if (dueCount > 0) {
         const message = `You have ${dueCount} exercise${dueCount !== 1 ? 's' : ''} due for practice today!`;
         alert(message);
     }
-
+*/
   displayWeeklyCalendar();
 }
         
@@ -3791,13 +3802,27 @@ function displayWeeklyCalendar() {
         }
         
         // Find exercises scheduled for this day
-        const dueExercises = repertoire.filter(item => {
-            // Skip archived items
-            if (item.status === REPERTOIRE_STATUS.ARCHIVED) return false;
-            
-            // Check if nextReview matches this day using consistent date comparison
-            return isSameDay(item.nextReview, day.date);
-        });
+        let dueExercises = [];
+        
+        if (day.isToday) {
+            // For today, show both today's exercises AND overdue exercises
+            dueExercises = repertoire.filter(item => {
+                // Skip archived items
+                if (item.status === REPERTOIRE_STATUS.ARCHIVED) return false;
+                
+                // Include if due today or overdue
+                return normalizeDate(item.nextReview) <= normalizeDate(day.date);
+            });
+        } else {
+            // For other days, just show that day's exercises
+            dueExercises = repertoire.filter(item => {
+                // Skip archived items
+                if (item.status === REPERTOIRE_STATUS.ARCHIVED) return false;
+                
+                // Check if nextReview matches this day using consistent date comparison
+                return isSameDay(item.nextReview, day.date);
+            });
+        }
         
         // Create exercise list
         const exerciseList = document.createElement('div');
@@ -3809,10 +3834,20 @@ function displayWeeklyCalendar() {
             noExercises.textContent = 'No exercises due';
             exerciseList.appendChild(noExercises);
         } else {
-            // Sort exercises (in hands first, then by name)
+            // Sort exercises (overdue first, then in hands, then by name)
             dueExercises.sort((a, b) => {
+                // Sort overdue first
+                const aIsOverdue = normalizeDate(a.nextReview) < normalizeDate(new Date());
+                const bIsOverdue = normalizeDate(b.nextReview) < normalizeDate(new Date());
+                
+                if (aIsOverdue && !bIsOverdue) return -1;
+                if (!aIsOverdue && bIsOverdue) return 1;
+                
+                // Then sort by in hands
                 if (a.inHands && !b.inHands) return -1;
                 if (!a.inHands && b.inHands) return 1;
+                
+                // Finally sort by name
                 return a.name.localeCompare(b.name);
             });
             
@@ -3835,7 +3870,7 @@ function displayWeeklyCalendar() {
                 } else if (reviewDate < todayDate) {
                     statusDot.style.backgroundColor = '#ff9800'; // Orange for overdue
                     exerciseItem.className += ' overdue';
-                    exerciseItem.title = 'Overdue';
+                    exerciseItem.title = 'Overdue: ' + formatReviewDate(exercise.nextReview);
                 } else if (isSameDay(reviewDate, todayDate)) {
                     statusDot.style.backgroundColor = '#4caf50'; // Green for today
                     exerciseItem.className += ' due-today';
