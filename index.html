@@ -1328,98 +1328,109 @@ function switchTab(tabId) {
         }
         
         // Add a new exercise
-        function addExercise() {
-            try {
-                // Check if elements exist
-                const nameInput = document.getElementById('exercise-name');
-                if (!nameInput) return;
-                
-                const categorySelect = document.getElementById('category-select');
-                if (!categorySelect) return;
-                
-                const difficultyLevel = document.getElementById('difficulty-level');
-                if (!difficultyLevel) return;
-                
-                const focusInput = document.getElementById('exercise-focus');
-                if (!focusInput) return;
-                
-                const notesInput = document.getElementById('exercise-notes');
-                if (!notesInput) return;
-                
-                // Get values safely
-                const name = nameInput.value ? nameInput.value.trim() : "";
-                const category = categorySelect.value || categories[0] || "Uncategorized";
-                const difficulty = parseInt(difficultyLevel.value || "3");
-                const technicalFocus = focusInput.value ? focusInput.value.trim() : "";
-                const notes = notesInput.value ? notesInput.value.trim() : "";
-                
-                if (!name) {
-                    alert('Please enter an exercise name');
-                    return;
-                }
-                
-                // Add the new exercise with SRS data
-                const today = new Date();
-                const newExercise = {
-                    id: Date.now(),
-                    name: name,
-                    category: category,
-                    difficulty: difficulty,
-                    technicalFocus: technicalFocus,
-                    notes: notes,
-                    interval: 1, // 1 day initial interval
-                    nextReview: today.toISOString().split('T')[0], // Due today
-                    reviewCount: 0,
-                    inHands: true, // Automatically add new exercises to "in hands"
-                    masteryLevel: 1, // Start at beginner level
-                    decayFactor: 1.0, // Default decay factor
-                    performanceHistory: [],
-                    dateAdded: today.toISOString(),
-                    tallyCount: 0 // Initialize tally count
-                };
-                
-                // Update the repertoire array
-                if (!Array.isArray(repertoire)) {
-                    repertoire = [];
-                }
-                
-                repertoire.push(newExercise);
-                
-                // Save to localStorage
-                try {
-                    localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
-                } catch (storageError) {
-                    return;
-                }
-                
-                // Add to practice log
-                try {
-                    addToPracticeLog(`Added new ${category} exercise: ${name}`);
-                } catch (logError) {
-                    // Continue even if logging fails
-                }
-                
-                // Reset form
-                nameInput.value = '';
-                focusInput.value = '';
-                notesInput.value = '';
-                
-                // Update displays
-                try {
-                    displayRepertoire();
-                } catch (displayError) {
-                    // Continue even if display update fails
-                }
-                
-                try {
-                    updateDashboard();
-                } catch (dashboardError) {
-                    // Continue even if dashboard update fails
-                }
-            } catch (error) {
-                // Silent error handling
-            }
+function addExercise() {
+    try {
+        // Check if elements exist
+        const nameInput = document.getElementById('exercise-name');
+        if (!nameInput) return;
+        
+        const categorySelect = document.getElementById('category-select');
+        if (!categorySelect) return;
+        
+        const difficultyLevel = document.getElementById('difficulty-level');
+        if (!difficultyLevel) return;
+        
+        const focusInput = document.getElementById('exercise-focus');
+        if (!focusInput) return;
+        
+        const notesInput = document.getElementById('exercise-notes');
+        if (!notesInput) return;
+        
+        // Get values safely
+        const name = nameInput.value ? nameInput.value.trim() : "";
+        const category = categorySelect.value || categories[0] || "Uncategorized";
+        const difficulty = parseInt(difficultyLevel.value || "3");
+        const technicalFocus = focusInput.value ? focusInput.value.trim() : "";
+        const notes = notesInput.value ? notesInput.value.trim() : "";
+        
+        if (!name) {
+            alert('Please enter an exercise name');
+            return;
         }
+        
+        // Add the new exercise with SRS data
+        // Use a safer way to get today's date that's timezone-proof
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize time to midnight
+        
+        // Format as YYYY-MM-DD without timezone issues
+        const formattedDate = today.getFullYear() + '-' + 
+                            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(today.getDate()).padStart(2, '0');
+        
+        const newExercise = {
+            id: Date.now(),
+            name: name,
+            category: category,
+            difficulty: difficulty,
+            technicalFocus: technicalFocus,
+            notes: notes,
+            interval: 1, // 1 day initial interval
+            nextReview: formattedDate, // Due today (fixed format)
+            reviewCount: 0,
+            inHands: true, // Automatically add new exercises to "in hands"
+            masteryLevel: 1, // Start at beginner level
+            decayFactor: 1.0, // Default decay factor
+            performanceHistory: [],
+            dateAdded: today.toISOString(),
+            lastPracticed: today.toISOString(), // Add this to prevent it being marked as neglected
+            status: REPERTOIRE_STATUS.ACTIVE, // Ensure status is set
+            tallyCount: 0 // Initialize tally count
+        };
+        
+        // Update the repertoire array
+        if (!Array.isArray(repertoire)) {
+            repertoire = [];
+        }
+        
+        repertoire.push(newExercise);
+        
+        // Save to localStorage
+        try {
+            localStorage.setItem('musicRepertoire', JSON.stringify(repertoire));
+        } catch (storageError) {
+            return;
+        }
+        
+        // Add to practice log
+        try {
+            addToPracticeLog(`Added new ${category} exercise: ${name}`);
+        } catch (logError) {
+            // Continue even if logging fails
+        }
+        
+        // Reset form
+        nameInput.value = '';
+        focusInput.value = '';
+        notesInput.value = '';
+        
+        // Update displays
+        try {
+            displayRepertoire();
+            displayWeeklyCalendar(); // Update the calendar as well
+        } catch (displayError) {
+            // Continue even if display update fails
+        }
+        
+        try {
+            updateDashboard();
+        } catch (dashboardError) {
+            // Continue even if dashboard update fails
+        }
+    } catch (error) {
+        // Silent error handling
+    }
+}
         
         // Remove an exercise
         function removeExercise(id) {
